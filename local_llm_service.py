@@ -15,6 +15,7 @@ import json
 import re
 import logging
 import subprocess
+import shutil
 from pathlib import Path
 from typing import Dict, Any, List, Optional, Generator
 
