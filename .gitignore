@@ -45,9 +45,11 @@ secrets.toml
 
 # Generated Agent Code Output & Sandboxes
 generated_code/
+outputs/
 agent_sandbox_*/
 xestal_sandbox_*/
 manual_sandbox_*/
+res_sandbox_*/
 
 # IDE & OS Files
 .DS_Store
