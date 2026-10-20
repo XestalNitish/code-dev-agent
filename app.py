@@ -14,6 +14,7 @@ import os
 import sys
 import json
 import time
+import html
 import shutil
 import subprocess
 import tempfile
@@ -73,7 +74,7 @@ CLAYMORPHISM_CSS = """
         --clay-dark-inset: inset 4px 4px 10px rgba(0, 0, 0, 0.55), inset -3px -3px 8px rgba(255, 255, 255, 0.05);
     }
 
-    /* Streamlit Global */
+    /* Streamlit Global Overrides */
     .stApp {
         background: linear-gradient(135deg, #f7f0fa 0%, #edf2fc 35%, #fbf3f5 70%, #f4edf9 100%);
         background-attachment: fixed;
@@ -201,6 +202,7 @@ CLAYMORPHISM_CSS = """
     .badge-green { color: #059669; }
     .badge-purple { color: #7c3aed; }
     .badge-pink { color: #db2777; }
+    .badge-amber { color: #d97706; }
 
     /* ═════════════════════════════════════════════════════════
        PILL BUTTONS & SOCIAL BADGES
@@ -394,6 +396,46 @@ CLAYMORPHISM_CSS = """
     }
 
     /* ═════════════════════════════════════════════════════════
+       ARCHITECTURE FLOW CARDS
+       ═════════════════════════════════════════════════════════ */
+    .arch-flow-container {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        margin: 20px 0;
+    }
+    .arch-step-card {
+        background: var(--clay-card-bg);
+        border-radius: 20px;
+        padding: 16px 20px;
+        box-shadow: var(--clay-shadow-sm);
+        border: 1px solid rgba(255, 255, 255, 0.8);
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+    .arch-step-num {
+        width: 44px;
+        height: 44px;
+        border-radius: 14px;
+        background: var(--clay-primary-gradient);
+        color: #ffffff;
+        font-weight: 800;
+        font-size: 1.1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        box-shadow: 3px 3px 8px rgba(99, 102, 241, 0.35);
+    }
+    .arch-arrow {
+        text-align: center;
+        color: #8b5cf6;
+        font-size: 1.3rem;
+        font-weight: 900;
+    }
+
+    /* ═════════════════════════════════════════════════════════
        FOOTER
        ═════════════════════════════════════════════════════════ */
     .clay-footer {
@@ -532,6 +574,7 @@ with st.sidebar:
 
     api_key_input = ""
     selected_model = ""
+    local_url = "http://127.0.0.1:8088/v1"
 
     if "Groq" in provider_choice:
         default_groq = os.getenv("GROQ_API_KEY", "")
@@ -547,6 +590,11 @@ with st.sidebar:
             options=["llama-3.3-70b-versatile", "qwen-2.5-coder-32b", "llama-3.1-8b-instant"],
             index=0
         )
+        if not api_key_input:
+            st.caption("ℹ️ No key entered; auto-fallback to Resilient Offline Synthesizer active.")
+        else:
+            st.caption("⚡ Connected to Groq Cloud API.")
+
     elif "Gemini" in provider_choice:
         default_gemini = os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY", "")
         api_key_input = st.text_input(
@@ -561,6 +609,11 @@ with st.sidebar:
             options=["gemini-1.5-flash", "gemini-2.0-flash", "gemini-1.5-pro"],
             index=0
         )
+        if not api_key_input:
+            st.caption("ℹ️ No key entered; auto-fallback to Resilient Offline Synthesizer active.")
+        else:
+            st.caption("🌟 Connected to Google Gemini API.")
+
     elif "OpenAI" in provider_choice:
         default_openai = os.getenv("OPENAI_API_KEY", "")
         api_key_input = st.text_input(
@@ -575,6 +628,11 @@ with st.sidebar:
             options=["gpt-4o-mini", "gpt-4o"],
             index=0
         )
+        if not api_key_input:
+            st.caption("ℹ️ No key entered; auto-fallback to Resilient Offline Synthesizer active.")
+        else:
+            st.caption("🤖 Connected to OpenAI API.")
+
     elif "Local" in provider_choice:
         local_url = st.text_input("Local Server Base URL", value="http://127.0.0.1:8088/v1")
         selected_model = "X-Estal-4B"
@@ -615,24 +673,22 @@ with st.sidebar:
 # 5. TOP CLAY HEADER
 # ─────────────────────────────────────────────────────────────
 
-st.markdown(f"""
-<div class="clay-header-banner">
-    <div class="header-title-box">
-        <div class="header-logo-icon">💻</div>
-        <div>
-            <div class="header-main-title">X-Estal Code Dev Agent</div>
-            <div class="header-sub-tag">
-                Autonomous Software Engineering Multi-Agent Studio • Plan, Write, Audit, Execute, Debug & Deliver
-            </div>
-        </div>
-    </div>
-    <div class="header-badges-row">
-        <span class="clay-badge badge-green">🟢 Production Ready</span>
-        <span class="clay-badge badge-purple">🦜 LangGraph StateGraph</span>
-        <span class="clay-badge badge-pink">👨‍💻 By X-Estal Nitish</span>
-    </div>
-</div>
-""", unsafe_allow_html=True)
+header_banner_html = (
+    f'<div class="clay-header-banner">'
+    f'<div class="header-title-box">'
+    f'<div class="header-logo-icon">💻</div>'
+    f'<div>'
+    f'<div class="header-main-title">X-Estal Code Dev Agent</div>'
+    f'<div class="header-sub-tag">'
+    f'Autonomous Software Engineering Multi-Agent Studio • Plan, Write, Audit, Execute, Debug & Deliver'
+    f'</div></div></div>'
+    f'<div class="header-badges-row">'
+    f'<span class="clay-badge badge-green">🟢 Production Ready</span>'
+    f'<span class="clay-badge badge-purple">🦜 LangGraph StateGraph</span>'
+    f'<span class="clay-badge badge-pink">👨‍💻 By X-Estal Nitish</span>'
+    f'</div></div>'
+)
+st.markdown(header_banner_html, unsafe_allow_html=True)
 
 
 # ─────────────────────────────────────────────────────────────
@@ -652,25 +708,38 @@ tab_studio, tab_sandbox, tab_tools, tab_architecture = st.tabs([
 # ─────────────────────────────────────────────────────────────
 
 with tab_studio:
-    st.markdown("""
-    <div style="font-size: 0.95rem; color: #4c1d95; margin-bottom: 14px; font-weight: 600;">
-        ⚡ Enter any software implementation task below. The multi-agent workflow will architect the solution,
-        generate production code, verify security constraints, execute tests in an isolated sandbox, and auto-heal bugs.
-    </div>
-    """, unsafe_allow_html=True)
+    intro_html = (
+        '<div style="font-size: 0.95rem; color: #4c1d95; margin-bottom: 14px; font-weight: 600;">'
+        '⚡ Enter any software implementation task below. The multi-agent workflow will architect the solution, '
+        'generate production code, verify security constraints, execute tests in an isolated sandbox, and auto-heal bugs.'
+        '</div>'
+    )
+    st.markdown(intro_html, unsafe_allow_html=True)
 
     # State initialization for preset prompt
     if "user_task_input" not in st.session_state:
         st.session_state["user_task_input"] = PRESET_TASKS["FastAPI Auth Microservice"]
 
-    # Preset inspiration buttons in clean responsive columns
+    # Preset inspiration buttons in clean responsive 3x2 grid
     st.markdown("**💡 Quick Preset Inspirations:**")
-    preset_cols = st.columns(len(PRESET_TASKS))
-    for idx, (p_name, p_prompt) in enumerate(PRESET_TASKS.items()):
-        with preset_cols[idx]:
+    preset_items = list(PRESET_TASKS.items())
+    row1_cols = st.columns(3)
+    for idx in range(3):
+        p_name, p_prompt = preset_items[idx]
+        with row1_cols[idx]:
             if st.button(p_name, key=f"btn_preset_{idx}", use_container_width=True):
                 st.session_state["user_task_input"] = p_prompt
                 st.rerun()
+
+    row2_cols = st.columns(3)
+    for idx in range(3, 6):
+        p_name, p_prompt = preset_items[idx]
+        with row2_cols[idx - 3]:
+            if st.button(p_name, key=f"btn_preset_{idx}", use_container_width=True):
+                st.session_state["user_task_input"] = p_prompt
+                st.rerun()
+
+    st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
 
     # Input controls
     with st.container():
@@ -689,9 +758,19 @@ with tab_studio:
                 options=["python", "javascript", "bash", "typescript", "sql"],
                 index=0
             )
+
+        lang_ext_map = {
+            "python": "solution.py",
+            "javascript": "solution.js",
+            "bash": "solution.sh",
+            "typescript": "solution.ts",
+            "sql": "solution.sql",
+        }
+        suggested_fname = lang_ext_map.get(target_language, f"solution.{target_language}")
+
         with col_file:
-            default_fname = "solution.py" if target_language == "python" else f"solution.{target_language}"
-            target_filename = st.text_input("Target File Name", value=default_fname)
+            target_filename = st.text_input("Target File Name", value=suggested_fname)
+
         with col_mode:
             exec_mode = st.selectbox(
                 "Pipeline Execution Mode",
@@ -703,10 +782,67 @@ with tab_studio:
                 index=0
             )
 
-    # Big Clay Action Launch Button
-    col_btn, col_empty = st.columns([1, 2])
+    # Action Launch & Reset Buttons
+    col_btn, col_reset, col_empty = st.columns([1.2, 0.6, 2.2])
     with col_btn:
         launch_clicked = st.button("🚀 Launch Code Dev Agent", type="primary", use_container_width=True)
+    with col_reset:
+        if st.button("🧹 Clear", use_container_width=True):
+            st.session_state["user_task_input"] = ""
+            if "latest_agent_result" in st.session_state:
+                del st.session_state["latest_agent_result"]
+            if "latest_agent_duration" in st.session_state:
+                del st.session_state["latest_agent_duration"]
+            st.session_state["pipeline_is_done"] = False
+            st.session_state["pipeline_active_idx"] = 0
+            st.rerun()
+
+    # 6 Stages Specification
+    stages = [
+        {"name": "Architectural Planner", "icon": "📐"},
+        {"name": "Senior Code Writer", "icon": "✍️"},
+        {"name": "Security Auditor", "icon": "🛡️"},
+        {"name": "Sandboxed Execution", "icon": "⚡"},
+        {"name": "Self-Healing Debugger", "icon": "🩺"},
+        {"name": "Production Reviewer", "icon": "📦"},
+    ]
+
+    def build_pipeline_html(active_idx: int = 0, is_done: bool = False) -> str:
+        items = []
+        for i, s in enumerate(stages):
+            if is_done or (active_idx > i):
+                card_class = "pipeline-card completed"
+                status_text = "Completed ✅"
+                status_class = "status-done"
+            elif active_idx == i:
+                card_class = "pipeline-card active"
+                status_text = "Executing... ⏳"
+                status_class = "status-running"
+            else:
+                card_class = "pipeline-card"
+                status_text = "Pending"
+                status_class = "status-pending"
+
+            item_html = (
+                f'<div class="{card_class}">'
+                f'<div class="pipeline-icon">{s["icon"]}</div>'
+                f'<div class="pipeline-name">{s["name"]}</div>'
+                f'<span class="pipeline-status {status_class}">{status_text}</span>'
+                f'</div>'
+            )
+            items.append(item_html)
+
+        return f'<div class="pipeline-grid">{"".join(items)}</div>'
+
+    # Pipeline Visualizer Placeholder
+    stage_tracker_placeholder = st.empty()
+
+    # Determine current visual state
+    current_is_done = st.session_state.get("pipeline_is_done", False)
+    current_idx = st.session_state.get("pipeline_active_idx", 0)
+
+    # Initial render of the tracker (shows stages in proper state)
+    stage_tracker_placeholder.markdown(build_pipeline_html(current_idx, current_is_done), unsafe_allow_html=True)
 
     # Execution handling
     if launch_clicked:
@@ -722,53 +858,11 @@ with tab_studio:
             elif "OpenAI" in provider_choice:
                 configured_llm = code_dev.get_dev_llm(provider="openai", api_key=api_key_input, model=selected_model, temperature=temperature)
             elif "Local" in provider_choice:
-                configured_llm = code_dev.get_dev_llm(provider="local", model="X-Estal-4B", base_url="http://127.0.0.1:8088/v1", temperature=temperature)
+                configured_llm = code_dev.get_dev_llm(provider="local", model="X-Estal-4B", base_url=local_url, temperature=temperature)
             else:
                 configured_llm = code_dev.AutonomousOfflineSynthesizer(temperature=temperature)
 
             code_dev.set_active_llm(configured_llm)
-
-            # Pipeline Visualizer Placeholder
-            stage_tracker_placeholder = st.empty()
-
-            stages = [
-                {"name": "Architectural Planner", "icon": "📐", "status": "pending"},
-                {"name": "Senior Code Writer", "icon": "✍️", "status": "pending"},
-                {"name": "Security Auditor", "icon": "🛡️", "status": "pending"},
-                {"name": "Sandboxed Execution", "icon": "⚡", "status": "pending"},
-                {"name": "Self-Healing Debugger", "icon": "🩺", "status": "pending"},
-                {"name": "Production Reviewer", "icon": "📦", "status": "pending"},
-            ]
-
-            def render_pipeline_ui(current_active_idx: int = 0, is_done: bool = False):
-                items = []
-                for i, s in enumerate(stages):
-                    if is_done or i < current_active_idx:
-                        card_class = "pipeline-card completed"
-                        status_text = "Completed ✅"
-                        status_class = "status-done"
-                    elif i == current_active_idx:
-                        card_class = "pipeline-card active"
-                        status_text = "Executing... ⏳"
-                        status_class = "status-running"
-                    else:
-                        card_class = "pipeline-card"
-                        status_text = "Pending"
-                        status_class = "status-pending"
-
-                    item_html = (
-                        f'<div class="{card_class}">'
-                        f'<div class="pipeline-icon">{s["icon"]}</div>'
-                        f'<div class="pipeline-name">{s["name"]}</div>'
-                        f'<span class="pipeline-status {status_class}">{status_text}</span>'
-                        f'</div>'
-                    )
-                    items.append(item_html)
-
-                full_html = f'<div class="pipeline-grid">{"".join(items)}</div>'
-                stage_tracker_placeholder.markdown(full_html, unsafe_allow_html=True)
-
-            render_pipeline_ui(0)
 
             node_to_idx = {
                 "planner": 0,
@@ -781,36 +875,59 @@ with tab_studio:
 
             def step_cb(node_name: str, state_update: Dict[str, Any]):
                 idx = node_to_idx.get(node_name, 0)
-                render_pipeline_ui(idx)
-                time.sleep(0.15)  # Smooth visual transition
+                stage_tracker_placeholder.markdown(build_pipeline_html(idx, is_done=False), unsafe_allow_html=True)
+                time.sleep(0.12)  # Smooth visual transition
 
-            with st.spinner("🤖 Autonomous Code Dev Agent executing workflow..."):
-                t_start = time.perf_counter()
-                agent_result = code_dev.run_code_dev_task(
-                    task=user_task,
-                    language=target_language,
-                    file_path=target_filename,
-                    llm=configured_llm,
-                    step_callback=step_cb
-                )
-                total_duration = round(time.perf_counter() - t_start, 2)
+            try:
+                with st.spinner("🤖 Autonomous Code Dev Agent executing workflow..."):
+                    t_start = time.perf_counter()
+                    agent_result = code_dev.run_code_dev_task(
+                        task=user_task,
+                        language=target_language,
+                        file_path=target_filename,
+                        llm=configured_llm,
+                        step_callback=step_cb,
+                        max_retries=max_retries,
+                        timeout=sandbox_timeout,
+                        exec_mode=exec_mode
+                    )
+                    total_duration = round(time.perf_counter() - t_start, 2)
 
-            render_pipeline_ui(5, is_done=True)
+                # Mark pipeline complete
+                st.session_state["pipeline_is_done"] = True
+                st.session_state["pipeline_active_idx"] = 5
+                stage_tracker_placeholder.markdown(build_pipeline_html(5, is_done=True), unsafe_allow_html=True)
 
-            # Store result in session state
-            st.session_state["latest_agent_result"] = agent_result
-            st.session_state["latest_agent_duration"] = total_duration
+                # Store result in session state
+                st.session_state["latest_agent_result"] = agent_result
+                st.session_state["latest_agent_duration"] = total_duration
+
+            except Exception as ex:
+                st.error(f"⚠️ Code Dev Agent Workflow Notice: {ex}")
+                st.info("💡 Tip: You can switch to the 'Autonomous Built-in Engine (Zero-Key Demo)' in the sidebar for guaranteed zero-dependency offline execution.")
 
     # Display Results if available
     if "latest_agent_result" in st.session_state:
         res = st.session_state["latest_agent_result"]
         dur = st.session_state.get("latest_agent_duration", 0)
-        display_file = os.path.basename(res.get("file_path", "solution.py"))
+        display_file = os.path.basename(res.get("file_path", target_filename or "solution.py"))
+        status_flag = res.get("status", "success")
+        sec_passed = res.get("security_passed", True)
+
+        if status_flag == "success" and sec_passed:
+            badge_title = "✅ Code Development Task Completed & Verified"
+            badge_color = "#10b981"
+        elif not sec_passed:
+            badge_title = "🛡️ Code Development Completed: Security Notice Flagged"
+            badge_color = "#f59e0b"
+        else:
+            badge_title = "🩺 Code Development Completed with Debugging Warnings"
+            badge_color = "#6366f1"
 
         summary_bar_html = (
-            f'<div class="clay-card-sm" style="display: flex; justify-content: space-between; align-items: center;">'
-            f'<div style="font-weight: 800; font-size: 1.1rem; color: #1e1b4b;">✅ Code Development Task Completed</div>'
-            f'<div style="font-size: 0.85rem; color: #6366f1; font-weight: 700;">⏱️ Elapsed: {dur}s | 🎯 Target: <code>{display_file}</code></div>'
+            f'<div class="clay-card-sm" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">'
+            f'<div style="font-weight: 800; font-size: 1.05rem; color: {badge_color};">{badge_title}</div>'
+            f'<div style="font-size: 0.85rem; color: #6366f1; font-weight: 700;">⏱️ Elapsed: {dur}s | 🎯 Target: <code>{html.escape(display_file)}</code></div>'
             f'</div>'
         )
         st.markdown(summary_bar_html, unsafe_allow_html=True)
@@ -840,19 +957,43 @@ with tab_studio:
                         try:
                             with open(script_p, "w", encoding="utf-8") as f:
                                 f.write(code_text)
+
                             t0 = time.perf_counter()
-                            proc = subprocess.run([sys.executable, script_p], capture_output=True, text=True, timeout=15, cwd=temp_d)
+                            if target_language == "python":
+                                cmd = [sys.executable, script_p]
+                            elif target_language == "javascript" and shutil.which("node"):
+                                cmd = ["node", script_p]
+                            elif target_language == "bash" and shutil.which("bash"):
+                                cmd = ["bash", script_p]
+                            else:
+                                cmd = [sys.executable, script_p]
+
+                            proc = subprocess.run(
+                                cmd,
+                                capture_output=True,
+                                text=True,
+                                timeout=sandbox_timeout,
+                                cwd=temp_d,
+                                env={**os.environ, "PYTHONIOENCODING": "utf-8", "PYTHONUTF8": "1"},
+                                errors="replace"
+                            )
                             d_ms = round((time.perf_counter() - t0) * 1000, 2)
-                            st.session_state["latest_agent_result"]["execution_output"] = proc.stdout or proc.stderr or f"Exit Code: {proc.returncode}"
+                            out_combined = proc.stdout.strip()
+                            if proc.stderr.strip():
+                                out_combined += f"\n\n[STDERR]:\n{proc.stderr.strip()}"
+                            st.session_state["latest_agent_result"]["execution_output"] = out_combined or f"Exit Code: {proc.returncode}"
                             st.toast(f"✅ Sandbox re-run complete ({d_ms}ms, Exit: {proc.returncode})")
                             st.rerun()
+                        except subprocess.TimeoutExpired:
+                            st.warning(f"⏳ Sandbox re-run timed out (exceeded {sandbox_timeout}s limit).")
+                        except Exception as e_sb:
+                            st.error(f"⚠️ Sandbox execution error: {e_sb}")
                         finally:
                             shutil.rmtree(temp_d, ignore_errors=True)
 
         with res_col_right:
             st.markdown("#### ⚡ Sandboxed Execution & Verification")
             stdout_logs = res.get("execution_output", "No stdout logs generated.")
-            import html
             safe_logs = html.escape(stdout_logs)
 
             term_html = (
@@ -863,7 +1004,7 @@ with tab_studio:
                 f'<span class="terminal-dot dot-yellow"></span>'
                 f'<span class="terminal-dot dot-green"></span>'
                 f'</div>'
-                f'<span>Sandbox Terminal — {display_file}</span>'
+                f'<span>Sandbox Terminal — {html.escape(display_file)}</span>'
                 f'</div>'
                 f'<div>{safe_logs}</div>'
                 f'</div>'
@@ -877,12 +1018,20 @@ with tab_studio:
 
             # Security Audit Badge
             with st.expander("🛡️ Security Audit Report", expanded=False):
+                sec_feed = res.get("security_feedback", "All static security invariants passed cleanly.")
+                is_pass = res.get("security_passed", True)
+                if is_pass:
+                    st.success("✅ **Static Security Invariants Passed Cleanly**")
+                else:
+                    st.warning("⚠️ **Security Concerns Flagged During Analysis**")
+
+                st.markdown(f"**Audit Findings & Safeguards:**\n- {sec_feed}")
                 st.markdown("""
-                - **System Wipe Injection Guard:** Passed ✅
-                - **Root Path Deletion Guard:** Passed ✅
-                - **Fork Bomb Signature Check:** Clean ✅
-                - **Interactive PTY Spawn Block:** Clean ✅
-                - **Runtime Subprocess Sandbox Isolation:** Safe ✅
+                - **System Wipe Injection Guard:** Enforced ✅
+                - **Root Path Deletion Guard:** Enforced ✅
+                - **Fork Bomb Signature Check:** Enforced ✅
+                - **Interactive PTY Spawn Block:** Enforced ✅
+                - **Runtime Subprocess Sandbox Isolation:** Active ✅
                 """)
 
 
@@ -891,17 +1040,18 @@ with tab_studio:
 # ─────────────────────────────────────────────────────────────
 
 with tab_sandbox:
-    st.markdown("""
-    <div class="clay-card">
-        <div style="font-weight: 800; font-size: 1.2rem; color: #1e1b4b; margin-bottom: 6px;">
-            🧪 Real-Time Isolated Sandbox Runner
-        </div>
-        <div style="font-size: 0.9rem; color: #5b5478; margin-bottom: 16px;">
-            Execute any custom Python script safely in an isolated sub-process with memory isolation,
-            timeout guard, and real-time standard output and error capture.
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+    sb_header_html = (
+        '<div class="clay-card">'
+        '<div style="font-weight: 800; font-size: 1.2rem; color: #1e1b4b; margin-bottom: 6px;">'
+        '🧪 Real-Time Isolated Sandbox Runner'
+        '</div>'
+        '<div style="font-size: 0.9rem; color: #5b5478;">'
+        'Execute any custom Python script safely in an isolated sub-process with memory isolation, '
+        'timeout guard, and real-time standard output and error capture.'
+        '</div>'
+        '</div>'
+    )
+    st.markdown(sb_header_html, unsafe_allow_html=True)
 
     # Sandbox presets
     SAMPLE_SCRIPTS = {
@@ -959,9 +1109,11 @@ with tab_sandbox:
         help="Paste any python code to run in the isolated sandbox."
     )
 
-    col_run_sb, col_sb_timeout = st.columns([1, 2])
+    col_run_sb, col_sb_timeout = st.columns([1, 1.5])
     with col_run_sb:
         run_sb_clicked = st.button("▶️ Run in Sandbox", type="primary", use_container_width=True)
+    with col_sb_timeout:
+        sb_runtime_timeout = st.slider("Sandbox Timeout Guard (s)", min_value=3, max_value=30, value=15, step=1, key="sb_custom_timeout")
 
     if run_sb_clicked:
         with st.spinner("⚡ Executing in sandbox..."):
@@ -977,8 +1129,9 @@ with tab_sandbox:
                     stdout=subprocess.PIPE,
                     stderr=subprocess.PIPE,
                     text=True,
-                    timeout=15,
+                    timeout=sb_runtime_timeout,
                     cwd=temp_dir,
+                    env={**os.environ, "PYTHONIOENCODING": "utf-8", "PYTHONUTF8": "1"},
                     errors="replace"
                 )
                 dur = round(time.perf_counter() - t0, 3)
@@ -995,7 +1148,6 @@ with tab_sandbox:
                 if stderr_text:
                     terminal_out += f"\n\n[STDERR TRACEBACK]:\n{stderr_text}"
 
-                import html
                 safe_terminal = html.escape(terminal_out or "Process completed with no output.")
                 sb_term_html = (
                     f'<div class="clay-terminal">'
@@ -1013,7 +1165,7 @@ with tab_sandbox:
                 st.markdown(sb_term_html, unsafe_allow_html=True)
 
             except subprocess.TimeoutExpired:
-                st.error("⏳ Execution timed out (exceeded 15s limit).")
+                st.error(f"⏳ Execution timed out (exceeded {sb_runtime_timeout}s limit).")
             except Exception as e:
                 st.error(f"Sandbox runtime error: {e}")
             finally:
@@ -1025,20 +1177,24 @@ with tab_sandbox:
 # ─────────────────────────────────────────────────────────────
 
 with tab_tools:
-    st.markdown("""
-    <div class="clay-card">
-        <div style="font-weight: 800; font-size: 1.2rem; color: #1e1b4b; margin-bottom: 6px;">
-            🛠️ Production Agentic Tools Suite (45+ Active Tools)
-        </div>
-        <div style="font-size: 0.9rem; color: #5b5478;">
-            The X-Estal agent ecosystem includes modular tools spanning code engineering,
-            security, file operations, AI/ML, document synthesis, and systems integration.
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+    tools_header_html = (
+        '<div class="clay-card">'
+        '<div style="font-weight: 800; font-size: 1.2rem; color: #1e1b4b; margin-bottom: 6px;">'
+        '🛠️ Production Agentic Tools Suite (45+ Active Tools)'
+        '</div>'
+        '<div style="font-size: 0.9rem; color: #5b5478;">'
+        'The X-Estal agent ecosystem includes modular tools spanning code engineering, '
+        'security, file operations, AI/ML, document synthesis, and systems integration.'
+        '</div>'
+        '</div>'
+    )
+    st.markdown(tools_header_html, unsafe_allow_html=True)
 
-    tool_search = st.text_input("🔍 Search tools by name or description...", placeholder="e.g. python, executor, secret, token, git, diff, hash...")
-    category_filter = st.selectbox("Filter by Category", options=["All Categories"] + list(TOOLS_BY_CATEGORY.keys()))
+    col_t_search, col_t_filter = st.columns([2, 1])
+    with col_t_search:
+        tool_search = st.text_input("🔍 Search tools by name or description...", placeholder="e.g. python, executor, secret, token, git, diff, hash...")
+    with col_t_filter:
+        category_filter = st.selectbox("Filter by Category", options=["All Categories"] + list(TOOLS_BY_CATEGORY.keys()))
 
     all_tool_entries = list_all_tools()
     filtered_tools = []
@@ -1053,12 +1209,15 @@ with tab_tools:
 
     cols_tools = st.columns(3)
     for idx, tool_info in enumerate(filtered_tools):
+        t_name = html.escape(tool_info["name"])
+        t_cat = html.escape(tool_info["category"])
+        t_desc = html.escape(tool_info["description"][:140])
         with cols_tools[idx % 3]:
             tool_html = (
                 f'<div class="clay-card-sm" style="min-height: 150px;">'
-                f'<div style="font-weight: 800; font-size: 0.98rem; color: #4338ca; margin-bottom: 4px;">🔧 <code>{tool_info["name"]}</code></div>'
-                f'<div style="font-size: 0.72rem; color: #7c3aed; font-weight: 700; margin-bottom: 8px;">🏷️ {tool_info["category"]}</div>'
-                f'<div style="font-size: 0.82rem; color: #475569; line-height: 1.4;">{tool_info["description"][:140]}...</div>'
+                f'<div style="font-weight: 800; font-size: 0.98rem; color: #4338ca; margin-bottom: 4px;">🔧 <code>{t_name}</code></div>'
+                f'<div style="font-size: 0.72rem; color: #7c3aed; font-weight: 700; margin-bottom: 8px;">🏷️ {t_cat}</div>'
+                f'<div style="font-size: 0.82rem; color: #475569; line-height: 1.4;">{t_desc}...</div>'
                 f'</div>'
             )
             st.markdown(tool_html, unsafe_allow_html=True)
@@ -1069,36 +1228,65 @@ with tab_tools:
 # ─────────────────────────────────────────────────────────────
 
 with tab_architecture:
-    st.markdown("""
-    <div class="clay-card">
-        <div style="font-weight: 800; font-size: 1.3rem; color: #1e1b4b; margin-bottom: 8px;">
-            🏗️ LangGraph Multi-Agent Architecture
-        </div>
-        <div style="font-size: 0.92rem; color: #475569; line-height: 1.7;">
-            The X-Estal Code Dev Agent is governed by a stateful cyclical directed graph built with <strong>LangGraph</strong>.
-            Unlike single-pass LLM prompts that produce hallucinated or broken code, our system enforces a strict 6-stage
-            lifecycle with self-healing feedback loops:
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+    arch_header_html = (
+        '<div class="clay-card">'
+        '<div style="font-weight: 800; font-size: 1.3rem; color: #1e1b4b; margin-bottom: 8px;">'
+        '🏗️ LangGraph Multi-Agent Architecture'
+        '</div>'
+        '<div style="font-size: 0.92rem; color: #475569; line-height: 1.7;">'
+        'The X-Estal Code Dev Agent is governed by a stateful cyclical directed graph built with <strong>LangGraph</strong>. '
+        'Unlike single-pass LLM prompts that produce hallucinated or broken code, our system enforces a strict 6-stage '
+        'lifecycle with self-healing feedback loops:'
+        '</div>'
+        '</div>'
+    )
+    st.markdown(arch_header_html, unsafe_allow_html=True)
 
-    st.markdown("""
-    ```mermaid
-    flowchart TD
-        Start([START]) --> Planner[1. Architectural Planner Node]
-        Planner --> Writer[2. Senior Code Writer Node]
-        Writer --> Security[3. Security & Safety Auditor Node]
+    arch_steps = [
+        {"num": "1", "name": "Architectural Planner Node", "desc": "Analyzes requirements, selects libraries, and constructs detailed technical blueprints with test criteria.", "icon": "📐"},
+        {"num": "2", "name": "Senior Code Writer Node", "desc": "Synthesizes robust, clean source code adhering to design specifications and runnable self-testing assertions.", "icon": "✍️"},
+        {"num": "3", "name": "Security & Safety Auditor Node", "desc": "Executes static AST checks against destructive commands, fork bombs, injection payloads, and credential leaks.", "icon": "🛡️"},
+        {"num": "4", "name": "Sandboxed Runtime Executor Node", "desc": "Runs code in an isolated subprocess with timeout guards, capturing stdout, stderr, and return codes.", "icon": "⚡"},
+        {"num": "5", "name": "Self-Healing Debugger Node", "desc": "Diagnoses execution tracebacks or security breaches, generating remediation directives to loop back to the Code Writer.", "icon": "🩺"},
+        {"num": "6", "name": "Production Reviewer Node", "desc": "Performs quality checks, compiles performance metrics, and delivers the verified deployment-ready package.", "icon": "📦"},
+    ]
 
-        Security -->|Security Pass| Executor[4. Sandboxed Runtime Executor Node]
-        Security -->|Security Violation| Debugger[5. Self-Healing Debugger Node]
+    arch_flow_html_list = ['<div class="arch-flow-container">']
+    for idx, step in enumerate(arch_steps):
+        s_card = (
+            f'<div class="arch-step-card">'
+            f'<div class="arch-step-num">{step["num"]}</div>'
+            f'<div style="flex-grow: 1;">'
+            f'<div style="font-weight: 800; font-size: 1.05rem; color: #1e1b4b; display: flex; align-items: center; gap: 8px;">'
+            f'<span>{step["icon"]}</span><span>{step["name"]}</span>'
+            f'</div>'
+            f'<div style="font-size: 0.86rem; color: #5b5478; margin-top: 4px;">{step["desc"]}</div>'
+            f'</div>'
+            f'</div>'
+        )
+        arch_flow_html_list.append(s_card)
+        if idx < len(arch_steps) - 1:
+            arch_flow_html_list.append('<div class="arch-arrow">↓ <i>(Self-Healing Feedback Loop: Steps 4 & 5 ➔ Step 2)</i> ↓</div>' if idx == 4 else '<div class="arch-arrow">↓</div>')
+    arch_flow_html_list.append('</div>')
 
-        Executor -->|Exit Code 0: Success| Reviewer[6. Technical Lead Reviewer Node]
-        Executor -->|Exit Code != 0: Runtime Crash| Debugger
+    st.markdown("".join(arch_flow_html_list), unsafe_allow_html=True)
 
-        Debugger -->|Automated Remediation Directive| Writer
-        Reviewer --> EndNode([END / Verified Delivery Report])
-    ```
-    """)
+    with st.expander("📊 View StateGraph Specification", expanded=False):
+        st.markdown("""
+        ```text
+        START
+          ↓
+        [planner]          -> Generates modular blueprint & test assertions
+          ↓
+        [writer]           -> Synthesizes full source code with self-tests
+          ↓
+        [security_check]   -> Verifies static invariants (AST injection, wipes)
+          ├── If Security Violation -> [debugger] -> [writer]
+          └── If Security Passed    -> [executor]
+                                         ├── If Exit != 0 -> [debugger] -> [writer] (Max 3 retries)
+                                         └── If Exit == 0 -> [reviewer] -> END (Delivery)
+        ```
+        """)
 
     st.markdown("### 🚀 Portfolio & Live Apps by X-Estal Nitish")
     st.markdown("Explore other autonomous AI and deep learning systems deployed live:")
@@ -1122,24 +1310,18 @@ with tab_architecture:
 # 7. CLAYMORPHISM FOOTER
 # ─────────────────────────────────────────────────────────────
 
-st.markdown(f"""
-<div class="clay-footer">
-    <div style="display: flex; justify-content: center; gap: 12px; margin-bottom: 16px; flex-wrap: wrap;">
-        <a href="{SOCIAL_LINKS['github']['url']}" target="_blank" rel="noopener noreferrer" class="pill-btn pill-github">
-            {SOCIAL_LINKS['github']['icon']} GitHub @XestalNitish
-        </a>
-        <a href="{SOCIAL_LINKS['linkedin']['url']}" target="_blank" rel="noopener noreferrer" class="pill-btn pill-linkedin">
-            {SOCIAL_LINKS['linkedin']['icon']} LinkedIn Nitish Kumar
-        </a>
-        <a href="{SOCIAL_LINKS['instagram']['url']}" target="_blank" rel="noopener noreferrer" class="pill-btn pill-instagram">
-            {SOCIAL_LINKS['instagram']['icon']} Instagram @x_estal_nitish
-        </a>
-    </div>
-    <div>
-        Crafted with 💜 by <strong>{DEVELOPER_NAME}</strong> (Nitish Kumar). Built with LangGraph & Streamlit.
-    </div>
-    <div style="font-size: 0.8rem; opacity: 0.7; margin-top: 4px;">
-        Production-Ready Multi-Agent Software Engineering Architecture.
-    </div>
-</div>
-""", unsafe_allow_html=True)
+footer_html = (
+    f'<div class="clay-footer">'
+    f'<div style="display: flex; justify-content: center; gap: 12px; margin-bottom: 16px; flex-wrap: wrap;">'
+    f'<a href="{SOCIAL_LINKS["github"]["url"]}" target="_blank" rel="noopener noreferrer" class="pill-btn pill-github">'
+    f'{SOCIAL_LINKS["github"]["icon"]} GitHub @XestalNitish</a>'
+    f'<a href="{SOCIAL_LINKS["linkedin"]["url"]}" target="_blank" rel="noopener noreferrer" class="pill-btn pill-linkedin">'
+    f'{SOCIAL_LINKS["linkedin"]["icon"]} LinkedIn Nitish Kumar</a>'
+    f'<a href="{SOCIAL_LINKS["instagram"]["url"]}" target="_blank" rel="noopener noreferrer" class="pill-btn pill-instagram">'
+    f'{SOCIAL_LINKS["instagram"]["icon"]} Instagram @x_estal_nitish</a>'
+    f'</div>'
+    f'<div>Crafted with 💜 by <strong>{DEVELOPER_NAME}</strong> (Nitish Kumar). Built with LangGraph & Streamlit.</div>'
+    f'<div style="font-size: 0.8rem; opacity: 0.7; margin-top: 4px;">Production-Ready Multi-Agent Software Engineering Architecture.</div>'
+    f'</div>'
+)
+st.markdown(footer_html, unsafe_allow_html=True)
