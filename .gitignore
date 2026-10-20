@@ -1,0 +1,58 @@
+# Python & Virtual Environments
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.venv/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Heavy Model Weights & Local Inference Binaries (>100MB, rejected by GitHub)
+models/
+llama_bin/
+*.gguf
+*.bin
+*.pt
+*.safetensors
+*.onnx
+
+# Environment Variables & Secrets
+.env
+.env.local
+.env.*.local
+secrets.toml
+
+# Streamlit Local Cache & Runtime Logs
+.streamlit/secrets.toml
+*.log
+
+# Generated Agent Code Output & Sandboxes
+generated_code/
+agent_sandbox_*/
+xestal_sandbox_*/
+manual_sandbox_*/
+
+# IDE & OS Files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.swo

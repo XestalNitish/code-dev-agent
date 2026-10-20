@@ -1,0 +1,21 @@
+# Core Streamlit & Web
+streamlit>=1.32.0
+python-dotenv>=1.0.0
+pydantic>=2.0.0
+requests>=2.31.0
+psutil>=5.9.0
+rich>=13.7.0
+
+# Multi-Agent & LangGraph Orchestration
+langchain>=0.2.0
+langchain-core>=0.2.0
+langchain-community>=0.2.0
+langchain-openai>=0.1.0
+langgraph>=0.1.0
+
+# Tools & Utilities
+beautifulsoup4>=4.12.0
+duckduckgo-search>=6.0.0
+pillow>=10.0.0
+matplotlib>=3.8.0
+vaderSentiment>=3.3.2

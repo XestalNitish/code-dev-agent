@@ -1,0 +1,63 @@
+# Full Local Stack & Model Serving Requirements
+fastapi>=0.110.0
+uvicorn>=0.28.0
+streamlit>=1.32.0
+
+# Multi-Agent & Orchestration Framework
+langchain>=0.2.0
+langchain-core>=0.2.0
+langchain-community>=0.2.0
+langgraph>=0.1.0
+langgraph-checkpoint>=0.1.0
+langchain-openai>=0.1.0
+
+# Model Serving & Local Weights
+huggingface-hub>=0.23.0
+transformers>=4.40.0
+llama-cpp-python>=0.3.0
+ollama>=0.2.0
+
+# Environment, Runtime & Validation
+python-dotenv>=1.0.0
+pydantic>=2.0.0
+requests>=2.31.0
+psutil>=5.9.0
+rich>=13.7.0
+tqdm>=4.66.0
+
+# Research, Web Search & Scrapers
+beautifulsoup4>=4.12.0
+feedparser>=6.0.10
+duckduckgo-search>=6.0.0
+wikipedia>=1.4.0
+arxiv>=2.1.0
+trafilatura>=1.8.0
+
+# Multimedia, Audio & Social Tools
+gTTS>=2.5.0
+yt-dlp>=2024.4.0
+youtube-transcript-api>=0.6.2
+pillow>=10.0.0
+matplotlib>=3.8.0
+qrcode>=7.4.2
+
+# Document & File Generation
+pypdf>=4.0.0
+python-docx>=1.1.0
+openpyxl>=3.1.0
+reportlab>=4.1.0
+
+# NLP & Analysis
+vaderSentiment>=3.3.2
+pint>=0.23.0
+yfinance>=0.2.38
+
+# Databases & Vector Stores
+chromadb>=0.5.0
+redis>=5.0.0
+pymongo>=4.6.0
+psycopg2-binary>=2.9.9
+pymysql>=1.1.0
+
+# Testing & Quality
+pytest>=8.0.0
