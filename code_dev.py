@@ -655,6 +655,20 @@ if __name__ == "__main__":
 # Active Global LLM instance
 _active_llm: Any = None
 
+def is_server_alive(base_url: str = "http://127.0.0.1:8088/v1") -> bool:
+    """Fast non-blocking check if local llama-server is responsive."""
+    import requests
+    clean_url = base_url.rstrip("/")
+    candidates = [f"{clean_url}/models", "http://127.0.0.1:8088/health", clean_url]
+    for url in candidates:
+        try:
+            r = requests.get(url, timeout=0.25)
+            if r.status_code == 200:
+                return True
+        except Exception:
+            pass
+    return False
+
 def get_dev_llm(
     provider: str = "auto",
     api_key: Optional[str] = None,
@@ -722,6 +736,9 @@ def get_dev_llm(
     # 4. Local Model (Spark-X2.5-4B / llama-server)
     if provider == "local":
         target_url = base_url or os.getenv("LOCAL_LLM_URL", "http://127.0.0.1:8088/v1")
+        if not is_server_alive(target_url):
+            logger.info("Local inference server is offline; activating autonomous resilient synthesizer.")
+            return AutonomousOfflineSynthesizer(temperature=temperature)
         try:
             from langchain_openai import ChatOpenAI
             return ChatOpenAI(
@@ -734,6 +751,7 @@ def get_dev_llm(
             )
         except Exception as e:
             logger.warning(f"Local server connection notice: {e}")
+            return AutonomousOfflineSynthesizer(temperature=temperature)
 
     # 5. Autonomous Offline Synthesizer
     return AutonomousOfflineSynthesizer(temperature=temperature)

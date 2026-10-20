@@ -276,51 +276,57 @@ CLAYMORPHISM_CSS = """
        PIPELINE STAGE TRACKER (6 AGENT NODES)
        ═════════════════════════════════════════════════════════ */
     .pipeline-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-        gap: 12px;
-        margin: 18px 0;
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: wrap !important;
+        gap: 12px !important;
+        margin: 18px 0 !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
     }
 
     .pipeline-card {
-        background: var(--clay-card-bg);
-        border-radius: 18px;
-        padding: 14px 12px;
-        text-align: center;
-        box-shadow: var(--clay-shadow-sm);
-        border: 1px solid rgba(255, 255, 255, 0.6);
-        transition: all 0.3s ease;
+        flex: 1 1 140px !important;
+        min-width: 130px !important;
+        background: var(--clay-card-bg) !important;
+        border-radius: 18px !important;
+        padding: 16px 10px !important;
+        text-align: center !important;
+        box-shadow: var(--clay-shadow-sm) !important;
+        border: 2px solid rgba(255, 255, 255, 0.75) !important;
+        transition: all 0.3s ease !important;
+        box-sizing: border-box !important;
     }
     .pipeline-card.active {
-        background: linear-gradient(135deg, #ffffff, #ede9fe);
-        border: 2px solid #7c3aed;
-        box-shadow: 0 0 16px rgba(124, 58, 237, 0.4);
-        transform: scale(1.03);
+        background: linear-gradient(135deg, #ffffff, #ede9fe) !important;
+        border: 2px solid #7c3aed !important;
+        box-shadow: 0 0 16px rgba(124, 58, 237, 0.45) !important;
+        transform: scale(1.03) !important;
     }
     .pipeline-card.completed {
-        background: linear-gradient(135deg, #ffffff, #ecfdf5);
-        border: 1.5px solid #10b981;
+        background: linear-gradient(135deg, #ffffff, #ecfdf5) !important;
+        border: 2px solid #10b981 !important;
     }
     .pipeline-icon {
-        font-size: 1.8rem;
-        margin-bottom: 6px;
+        font-size: 1.8rem !important;
+        margin-bottom: 6px !important;
     }
     .pipeline-name {
-        font-weight: 700;
-        font-size: 0.85rem;
-        color: var(--text-main);
+        font-weight: 700 !important;
+        font-size: 0.85rem !important;
+        color: var(--text-main) !important;
     }
     .pipeline-status {
-        font-size: 0.74rem;
-        font-weight: 700;
-        margin-top: 5px;
-        padding: 3px 9px;
-        border-radius: 12px;
-        display: inline-block;
+        font-size: 0.74rem !important;
+        font-weight: 700 !important;
+        margin-top: 5px !important;
+        padding: 3px 9px !important;
+        border-radius: 12px !important;
+        display: inline-block !important;
     }
-    .status-pending { background: rgba(148, 163, 184, 0.2); color: #475569; }
-    .status-running { background: rgba(99, 102, 241, 0.2); color: #3730a3; }
-    .status-done { background: rgba(16, 185, 129, 0.2); color: #047857; }
+    .status-pending { background: rgba(148, 163, 184, 0.2) !important; color: #475569 !important; }
+    .status-running { background: rgba(99, 102, 241, 0.2) !important; color: #3730a3 !important; }
+    .status-done { background: rgba(16, 185, 129, 0.2) !important; color: #047857 !important; }
 
     /* ═════════════════════════════════════════════════════════
        DARK CLAY TERMINAL (SANDBOX EXECUTION LOGS)
@@ -491,26 +497,22 @@ PRESET_TASKS = {
 
 with st.sidebar:
     # Developer Identity Card
-    st.markdown(f"""
-    <div class="clay-card-sm" style="text-align: center;">
-        <div style="font-size: 2.4rem; margin-bottom: 6px;">👨‍💻</div>
-        <div style="font-weight: 800; font-size: 1.15rem; color: #1e1b4b;">{DISPLAY_NAME}</div>
-        <div style="font-size: 0.8rem; color: #6366f1; font-weight: 600; margin-bottom: 12px;">
-            AI Developer • Multi-Agent Architect
-        </div>
-        <div style="display: flex; justify-content: center; gap: 8px; flex-wrap: wrap;">
-            <a href="{SOCIAL_LINKS['github']['url']}" target="_blank" rel="noopener noreferrer" class="pill-btn pill-github" style="padding: 6px 14px; font-size: 0.78rem;">
-                {SOCIAL_LINKS['github']['icon']} GitHub
-            </a>
-            <a href="{SOCIAL_LINKS['linkedin']['url']}" target="_blank" rel="noopener noreferrer" class="pill-btn pill-linkedin" style="padding: 6px 14px; font-size: 0.78rem;">
-                {SOCIAL_LINKS['linkedin']['icon']} LinkedIn
-            </a>
-            <a href="{SOCIAL_LINKS['instagram']['url']}" target="_blank" rel="noopener noreferrer" class="pill-btn pill-instagram" style="padding: 6px 14px; font-size: 0.78rem;">
-                {SOCIAL_LINKS['instagram']['icon']} Insta
-            </a>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+    dev_card_html = (
+        f'<div class="clay-card-sm" style="text-align: center;">'
+        f'<div style="font-size: 2.4rem; margin-bottom: 6px;">👨‍💻</div>'
+        f'<div style="font-weight: 800; font-size: 1.15rem; color: #1e1b4b;">{DISPLAY_NAME}</div>'
+        f'<div style="font-size: 0.8rem; color: #6366f1; font-weight: 600; margin-bottom: 12px;">'
+        f'AI Developer • Multi-Agent Architect</div>'
+        f'<div style="display: flex; justify-content: center; gap: 8px; flex-wrap: wrap;">'
+        f'<a href="{SOCIAL_LINKS["github"]["url"]}" target="_blank" rel="noopener noreferrer" class="pill-btn pill-github" style="padding: 6px 14px; font-size: 0.78rem;">'
+        f'{SOCIAL_LINKS["github"]["icon"]} GitHub</a>'
+        f'<a href="{SOCIAL_LINKS["linkedin"]["url"]}" target="_blank" rel="noopener noreferrer" class="pill-btn pill-linkedin" style="padding: 6px 14px; font-size: 0.78rem;">'
+        f'{SOCIAL_LINKS["linkedin"]["icon"]} LinkedIn</a>'
+        f'<a href="{SOCIAL_LINKS["instagram"]["url"]}" target="_blank" rel="noopener noreferrer" class="pill-btn pill-instagram" style="padding: 6px 14px; font-size: 0.78rem;">'
+        f'{SOCIAL_LINKS["instagram"]["icon"]} Insta</a>'
+        f'</div></div>'
+    )
+    st.markdown(dev_card_html, unsafe_allow_html=True)
 
     # AI Engine Provider Settings
     st.markdown("### 🧠 AI Engine Settings")
@@ -518,8 +520,8 @@ with st.sidebar:
     provider_choice = st.selectbox(
         "Inference Engine",
         options=[
-            "Groq (Fast Cloud - Free Key)",
             "Autonomous Built-in Engine (Zero-Key Demo)",
+            "Groq (Fast Cloud - Free Key)",
             "Google Gemini (API Key)",
             "OpenAI (GPT-4o / GPT-4o-mini)",
             "Local Spark-X2.5-4B (llama-server)",
@@ -574,9 +576,12 @@ with st.sidebar:
             index=0
         )
     elif "Local" in provider_choice:
-        st.info("Local inference uses Spark-X2.5-4B via llama-server (Port 8088).")
         local_url = st.text_input("Local Server Base URL", value="http://127.0.0.1:8088/v1")
         selected_model = "X-Estal-4B"
+        if code_dev.is_server_alive(local_url):
+            st.success("🟢 Local Spark-X2.5 server is ONLINE.")
+        else:
+            st.warning("⚠️ Local llama-server (Port 8088) is OFFLINE. The agent will automatically use the Resilient Synthesizer so requests never hang.")
     else:
         st.success("🟢 Autonomous resilient engine active. Runs 100% offline with zero API key requirement!")
 
@@ -593,16 +598,17 @@ with st.sidebar:
     # Featured Live Projects by X-Estal Nitish
     st.markdown("### 🚀 Live Apps by X-Estal Nitish")
     for proj in PORTFOLIO_PROJECTS:
-        st.markdown(f"""
-        <a href="{proj['url']}" target="_blank" rel="noopener noreferrer" class="project-clay-item">
-            <div class="project-item-title">
-                <span>{proj['icon']} {proj['name']}</span>
-                <span style="font-size: 0.72rem; background: rgba(99,102,241,0.15); color: #4f46e5; padding: 2px 8px; border-radius: 10px;">{proj['tag']}</span>
-            </div>
-            <div class="project-item-desc">{proj['desc']}</div>
-            <div style="font-size: 0.75rem; color: #6366f1; font-weight: 700; margin-top: 6px;">🔗 Launch Live App &rarr;</div>
-        </a>
-        """, unsafe_allow_html=True)
+        proj_item_html = (
+            f'<a href="{proj["url"]}" target="_blank" rel="noopener noreferrer" class="project-clay-item">'
+            f'<div class="project-item-title">'
+            f'<span>{proj["icon"]} {proj["name"]}</span>'
+            f'<span style="font-size: 0.72rem; background: rgba(99,102,241,0.15); color: #4f46e5; padding: 2px 8px; border-radius: 10px;">{proj["tag"]}</span>'
+            f'</div>'
+            f'<div class="project-item-desc">{proj["desc"]}</div>'
+            f'<div style="font-size: 0.75rem; color: #6366f1; font-weight: 700; margin-top: 6px;">🔗 Launch Live App &rarr;</div>'
+            f'</a>'
+        )
+        st.markdown(proj_item_html, unsafe_allow_html=True)
 
 
 # ─────────────────────────────────────────────────────────────
@@ -735,30 +741,32 @@ with tab_studio:
             ]
 
             def render_pipeline_ui(current_active_idx: int = 0, is_done: bool = False):
-                cards_html = '<div class="pipeline-grid">'
+                items = []
                 for i, s in enumerate(stages):
-                    card_class = "pipeline-card"
-                    status_text = "Pending"
-                    status_class = "status-pending"
-
                     if is_done or i < current_active_idx:
-                        card_class += " completed"
+                        card_class = "pipeline-card completed"
                         status_text = "Completed ✅"
                         status_class = "status-done"
                     elif i == current_active_idx:
-                        card_class += " active"
+                        card_class = "pipeline-card active"
                         status_text = "Executing... ⏳"
                         status_class = "status-running"
+                    else:
+                        card_class = "pipeline-card"
+                        status_text = "Pending"
+                        status_class = "status-pending"
 
-                    cards_html += f"""
-                    <div class="{card_class}">
-                        <div class="pipeline-icon">{s['icon']}</div>
-                        <div class="pipeline-name">{s['name']}</div>
-                        <span class="pipeline-status {status_class}">{status_text}</span>
-                    </div>
-                    """
-                cards_html += '</div>'
-                stage_tracker_placeholder.markdown(cards_html, unsafe_allow_html=True)
+                    item_html = (
+                        f'<div class="{card_class}">'
+                        f'<div class="pipeline-icon">{s["icon"]}</div>'
+                        f'<div class="pipeline-name">{s["name"]}</div>'
+                        f'<span class="pipeline-status {status_class}">{status_text}</span>'
+                        f'</div>'
+                    )
+                    items.append(item_html)
+
+                full_html = f'<div class="pipeline-grid">{"".join(items)}</div>'
+                stage_tracker_placeholder.markdown(full_html, unsafe_allow_html=True)
 
             render_pipeline_ui(0)
 
@@ -799,16 +807,13 @@ with tab_studio:
         dur = st.session_state.get("latest_agent_duration", 0)
         display_file = os.path.basename(res.get("file_path", "solution.py"))
 
-        st.markdown(f"""
-        <div class="clay-card-sm" style="display: flex; justify-content: space-between; align-items: center;">
-            <div style="font-weight: 800; font-size: 1.1rem; color: #1e1b4b;">
-                ✅ Code Development Task Completed
-            </div>
-            <div style="font-size: 0.85rem; color: #6366f1; font-weight: 700;">
-                ⏱️ Elapsed: {dur}s | 🎯 Target: <code>{display_file}</code>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
+        summary_bar_html = (
+            f'<div class="clay-card-sm" style="display: flex; justify-content: space-between; align-items: center;">'
+            f'<div style="font-weight: 800; font-size: 1.1rem; color: #1e1b4b;">✅ Code Development Task Completed</div>'
+            f'<div style="font-size: 0.85rem; color: #6366f1; font-weight: 700;">⏱️ Elapsed: {dur}s | 🎯 Target: <code>{display_file}</code></div>'
+            f'</div>'
+        )
+        st.markdown(summary_bar_html, unsafe_allow_html=True)
 
         res_col_left, res_col_right = st.columns([1.3, 1])
 
@@ -847,20 +852,23 @@ with tab_studio:
         with res_col_right:
             st.markdown("#### ⚡ Sandboxed Execution & Verification")
             stdout_logs = res.get("execution_output", "No stdout logs generated.")
+            import html
+            safe_logs = html.escape(stdout_logs)
 
-            st.markdown(f"""
-            <div class="clay-terminal">
-                <div class="terminal-header">
-                    <div class="terminal-dots">
-                        <span class="terminal-dot dot-red"></span>
-                        <span class="terminal-dot dot-yellow"></span>
-                        <span class="terminal-dot dot-green"></span>
-                    </div>
-                    <span>Sandbox Terminal — {display_file}</span>
-                </div>
-                <div>{stdout_logs}</div>
-            </div>
-            """, unsafe_allow_html=True)
+            term_html = (
+                f'<div class="clay-terminal">'
+                f'<div class="terminal-header">'
+                f'<div class="terminal-dots">'
+                f'<span class="terminal-dot dot-red"></span>'
+                f'<span class="terminal-dot dot-yellow"></span>'
+                f'<span class="terminal-dot dot-green"></span>'
+                f'</div>'
+                f'<span>Sandbox Terminal — {display_file}</span>'
+                f'</div>'
+                f'<div>{safe_logs}</div>'
+                f'</div>'
+            )
+            st.markdown(term_html, unsafe_allow_html=True)
 
             # Architectural Blueprint Accordion
             with st.expander("📐 Architectural Blueprint & Dependency Notes", expanded=True):
@@ -987,19 +995,22 @@ with tab_sandbox:
                 if stderr_text:
                     terminal_out += f"\n\n[STDERR TRACEBACK]:\n{stderr_text}"
 
-                st.markdown(f"""
-                <div class="clay-terminal">
-                    <div class="terminal-header">
-                        <div class="terminal-dots">
-                            <span class="terminal-dot dot-red"></span>
-                            <span class="terminal-dot dot-yellow"></span>
-                            <span class="terminal-dot dot-green"></span>
-                        </div>
-                        <span>Sandbox Output — Duration: {dur}s | Exit: {proc.returncode}</span>
-                    </div>
-                    <div>{terminal_out or "Process completed with no output."}</div>
-                </div>
-                """, unsafe_allow_html=True)
+                import html
+                safe_terminal = html.escape(terminal_out or "Process completed with no output.")
+                sb_term_html = (
+                    f'<div class="clay-terminal">'
+                    f'<div class="terminal-header">'
+                    f'<div class="terminal-dots">'
+                    f'<span class="terminal-dot dot-red"></span>'
+                    f'<span class="terminal-dot dot-yellow"></span>'
+                    f'<span class="terminal-dot dot-green"></span>'
+                    f'</div>'
+                    f'<span>Sandbox Output — Duration: {dur}s | Exit: {proc.returncode}</span>'
+                    f'</div>'
+                    f'<div>{safe_terminal}</div>'
+                    f'</div>'
+                )
+                st.markdown(sb_term_html, unsafe_allow_html=True)
 
             except subprocess.TimeoutExpired:
                 st.error("⏳ Execution timed out (exceeded 15s limit).")
@@ -1043,19 +1054,14 @@ with tab_tools:
     cols_tools = st.columns(3)
     for idx, tool_info in enumerate(filtered_tools):
         with cols_tools[idx % 3]:
-            st.markdown(f"""
-            <div class="clay-card-sm" style="min-height: 150px;">
-                <div style="font-weight: 800; font-size: 0.98rem; color: #4338ca; margin-bottom: 4px;">
-                    🔧 <code>{tool_info['name']}</code>
-                </div>
-                <div style="font-size: 0.72rem; color: #7c3aed; font-weight: 700; margin-bottom: 8px;">
-                    🏷️ {tool_info['category']}
-                </div>
-                <div style="font-size: 0.82rem; color: #475569; line-height: 1.4;">
-                    {tool_info['description'][:140]}...
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
+            tool_html = (
+                f'<div class="clay-card-sm" style="min-height: 150px;">'
+                f'<div style="font-weight: 800; font-size: 0.98rem; color: #4338ca; margin-bottom: 4px;">🔧 <code>{tool_info["name"]}</code></div>'
+                f'<div style="font-size: 0.72rem; color: #7c3aed; font-weight: 700; margin-bottom: 8px;">🏷️ {tool_info["category"]}</div>'
+                f'<div style="font-size: 0.82rem; color: #475569; line-height: 1.4;">{tool_info["description"][:140]}...</div>'
+                f'</div>'
+            )
+            st.markdown(tool_html, unsafe_allow_html=True)
 
 
 # ─────────────────────────────────────────────────────────────
@@ -1100,20 +1106,16 @@ with tab_architecture:
     proj_cols = st.columns(3)
     for idx, p in enumerate(PORTFOLIO_PROJECTS):
         with proj_cols[idx]:
-            st.markdown(f"""
-            <div class="clay-card" style="text-align: center;">
-                <div style="font-size: 3rem; margin-bottom: 10px;">{p['icon']}</div>
-                <div style="font-weight: 800; font-size: 1.15rem; color: #1e1b4b; margin-bottom: 8px;">
-                    {p['name']}
-                </div>
-                <div style="font-size: 0.88rem; color: #5b5478; line-height: 1.5; margin-bottom: 16px;">
-                    {p['desc']}
-                </div>
-                <a href="{p['url']}" target="_blank" rel="noopener noreferrer" class="pill-btn pill-github" style="background: linear-gradient(135deg, #6366f1, #8b5cf6);">
-                    🔗 Open Live App
-                </a>
-            </div>
-            """, unsafe_allow_html=True)
+            proj_card_html = (
+                f'<div class="clay-card" style="text-align: center;">'
+                f'<div style="font-size: 3rem; margin-bottom: 10px;">{p["icon"]}</div>'
+                f'<div style="font-weight: 800; font-size: 1.15rem; color: #1e1b4b; margin-bottom: 8px;">{p["name"]}</div>'
+                f'<div style="font-size: 0.88rem; color: #5b5478; line-height: 1.5; margin-bottom: 16px;">{p["desc"]}</div>'
+                f'<a href="{p["url"]}" target="_blank" rel="noopener noreferrer" class="pill-btn pill-github" style="background: linear-gradient(135deg, #6366f1, #8b5cf6);">'
+                f'🔗 Open Live App</a>'
+                f'</div>'
+            )
+            st.markdown(proj_card_html, unsafe_allow_html=True)
 
 
 # ─────────────────────────────────────────────────────────────
