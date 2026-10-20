@@ -244,34 +244,66 @@ CLAYMORPHISM_CSS = """
        PROJECT LINK CARDS (SIDEBAR / SHOWCASE)
        ═════════════════════════════════════════════════════════ */
     .project-clay-item {
-        background: linear-gradient(145deg, #ffffff, #f7f1fc);
-        border-radius: 20px;
-        padding: 14px 16px;
-        margin-bottom: 12px;
-        box-shadow: var(--clay-shadow-sm);
-        border: 1px solid rgba(255, 255, 255, 0.7);
-        transition: all 0.3s ease;
-        text-decoration: none !important;
-        display: block;
+        position: relative;
+        background: linear-gradient(145deg, #ffffff, #f7f1fc) !important;
+        border-radius: 20px !important;
+        padding: 14px 16px !important;
+        margin-bottom: 12px !important;
+        box-shadow: var(--clay-shadow-sm) !important;
+        border: 1px solid rgba(255, 255, 255, 0.7) !important;
+        transition: all 0.3s ease !important;
+        display: block !important;
+        box-sizing: border-box !important;
     }
     .project-clay-item:hover {
-        transform: translateY(-3px);
-        box-shadow: var(--clay-shadow-out);
-        text-decoration: none !important;
+        transform: translateY(-3px) !important;
+        box-shadow: var(--clay-shadow-out) !important;
+        border-color: rgba(99, 102, 241, 0.4) !important;
     }
     .project-item-title {
-        font-weight: 800;
-        font-size: 0.95rem;
-        color: var(--text-main);
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
+        font-weight: 800 !important;
+        font-size: 0.95rem !important;
+        color: var(--text-main) !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        margin-bottom: 4px !important;
+    }
+    .project-tag-pill {
+        font-size: 0.72rem !important;
+        background: rgba(99, 102, 241, 0.12) !important;
+        color: #4f46e5 !important;
+        padding: 2px 8px !important;
+        border-radius: 10px !important;
+        font-weight: 600 !important;
+        letter-spacing: 0.3px !important;
     }
     .project-item-desc {
-        font-size: 0.82rem;
-        color: var(--text-muted);
-        margin-top: 4px;
-        line-height: 1.4;
+        font-size: 0.82rem !important;
+        color: var(--text-muted) !important;
+        margin-top: 4px !important;
+        line-height: 1.4 !important;
+    }
+    .project-launch-btn {
+        display: inline-block !important;
+        font-size: 0.76rem !important;
+        color: #6366f1 !important;
+        font-weight: 700 !important;
+        text-decoration: none !important;
+        margin-top: 8px !important;
+        transition: color 0.2s ease !important;
+    }
+    .project-launch-btn:hover {
+        color: #4338ca !important;
+    }
+    .project-launch-btn::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        border-radius: 20px;
     }
 
     /* ═════════════════════════════════════════════════════════
@@ -684,18 +716,22 @@ with st.sidebar:
 
     # Featured Live Projects by X-Estal Nitish
     st.markdown("### 🚀 Live Apps by X-Estal Nitish")
-    for proj in PORTFOLIO_PROJECTS:
-        proj_item_html = (
-            f'<a href="{proj["url"]}" target="_blank" rel="noopener noreferrer" class="project-clay-item">'
-            f'<div class="project-item-title">'
-            f'<span>{proj["icon"]} {proj["name"]}</span>'
-            f'<span style="font-size: 0.72rem; background: rgba(99,102,241,0.15); color: #4f46e5; padding: 2px 8px; border-radius: 10px;">{proj["tag"]}</span>'
-            f'</div>'
-            f'<div class="project-item-desc">{proj["desc"]}</div>'
-            f'<div style="font-size: 0.75rem; color: #6366f1; font-weight: 700; margin-top: 6px;">🔗 Launch Live App &rarr;</div>'
-            f'</a>'
-        )
-        st.markdown(proj_item_html, unsafe_allow_html=True)
+    projects_html = "".join([
+        f'<div class="project-clay-item">'
+        f'<div class="project-item-title">'
+        f'<span>{proj["icon"]} {proj["name"]}</span>'
+        f'<span class="project-tag-pill">{proj["tag"]}</span>'
+        f'</div>'
+        f'<div class="project-item-desc">{proj["desc"]}</div>'
+        f'<div>'
+        f'<a href="{proj["url"]}" target="_blank" rel="noopener noreferrer" class="project-launch-btn">'
+        f'🔗 Launch Live App &rarr;'
+        f'</a>'
+        f'</div>'
+        f'</div>'
+        for proj in PORTFOLIO_PROJECTS
+    ])
+    st.markdown(projects_html, unsafe_allow_html=True)
 
 
 # ─────────────────────────────────────────────────────────────
