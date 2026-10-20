@@ -62,9 +62,10 @@ def get_model_path() -> Path:
 
 
 def get_server_binary() -> Optional[Path]:
-    """Find local llama-server.exe binary."""
+    """Find local llama-server executable binary."""
     candidates = [
         _ROOT / "llama_bin" / "llama-server.exe",
+        _ROOT / "llama_bin" / "llama-server",
         _ROOT.parent / "local llm" / "llama_bin" / "llama-server.exe",
         Path("d:/local llm/llama_bin/llama-server.exe"),
         Path("D:/agentic ai/llama_bin/llama-server.exe"),
@@ -72,7 +73,16 @@ def get_server_binary() -> Optional[Path]:
     for c in candidates:
         if c.exists():
             return c
+    for name in ["llama-server", "llama-server.exe"]:
+        in_path = shutil.which(name)
+        if in_path:
+            return Path(in_path)
     return None
+
+
+def is_local_capable() -> bool:
+    """Check if local llama-server is currently active or capable of running locally."""
+    return is_server_alive() or (get_server_binary() is not None and get_model_path() is not None)
 
 
 def is_server_alive(host: str = DEFAULT_HOST, port: int = DEFAULT_PORT) -> bool:
@@ -108,11 +118,11 @@ def start_local_server(
     model = get_model_path()
 
     if not exe or not exe.exists():
-        logger.error(f"llama-server executable not found. Looked for: {exe}")
+        logger.info(f"Local llama-server binary not found on this host (cloud/remote deployment active).")
         return False
 
     if not model or not model.exists():
-        logger.error(f"GGUF model weights not found at: {model}")
+        logger.info(f"Local GGUF model weights not found on this host (cloud/remote deployment active).")
         return False
 
     cmd = [

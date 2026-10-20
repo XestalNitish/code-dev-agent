@@ -559,14 +559,40 @@ with st.sidebar:
     # AI Engine Provider Settings
     st.markdown("### 🧠 Live AI Engine Settings")
 
-    provider_choice = st.selectbox(
-        "Live Inference Engine",
-        options=[
+    # Helper to check secrets and environment variables safely
+    def _fetch_secret(env_key: str) -> str:
+        val = os.getenv(env_key, "")
+        if val:
+            return val
+        try:
+            if hasattr(st, "secrets") and env_key in st.secrets:
+                return str(st.secrets[env_key])
+        except Exception:
+            pass
+        return ""
+
+    import local_llm_service
+    is_local_capable = local_llm_service.is_local_capable()
+
+    if is_local_capable:
+        engine_options = [
             "Local Spark-X2.5-4B (llama-server Live)",
             "Groq Cloud (Fast Llama-3.3 / Qwen-2.5 Coder)",
             "Google Gemini (API Key)",
             "OpenAI (GPT-4o / GPT-4o-mini)",
-        ],
+        ]
+    else:
+        # Streamlit Cloud or remote headless deployment
+        engine_options = [
+            "Groq Cloud (Fast Llama-3.3 / Qwen-2.5 Coder)",
+            "Google Gemini (API Key)",
+            "OpenAI (GPT-4o / GPT-4o-mini)",
+            "Local Spark-X2.5-4B (llama-server - Local Desktop)",
+        ]
+
+    provider_choice = st.selectbox(
+        "Live Inference Engine",
+        options=engine_options,
         index=0,
         help="Select the live LLM engine for planning, writing, and debugging source code."
     )
@@ -580,22 +606,23 @@ with st.sidebar:
         selected_model = "X-Estal-4B"
         if code_dev.is_server_alive():
             st.success("🟢 Local Spark-X2.5 server is ONLINE & running live (Port 8088).")
+        elif not is_local_capable:
+            st.info("ℹ️ Local llama-server & 2.6GB GGUF weights run on desktop workstations. On Streamlit Cloud, please select **Groq Cloud (Free)** or **Gemini** above for live cloud inference.")
         else:
             st.warning("⚠️ Local llama-server is currently offline.")
             if st.button("🚀 Start Local LLM Server", use_container_width=True):
                 with st.spinner("Starting local Spark-X2.5 llama-server..."):
-                    import local_llm_service
                     local_llm_service.start_local_server(wait_timeout=10)
                     st.rerun()
 
     elif "Groq" in provider_choice:
-        default_groq = os.getenv("GROQ_API_KEY", "")
+        default_groq = _fetch_secret("GROQ_API_KEY")
         api_key_input = st.text_input(
             "Groq API Key",
             value=default_groq,
             type="password",
             placeholder="gsk_...",
-            help="Free Groq API key from console.groq.com. Instant ultra-fast responses."
+            help="Free Groq API key from console.groq.com. Instant ultra-fast cloud responses."
         )
         selected_model = st.selectbox(
             "Model",
@@ -605,10 +632,10 @@ with st.sidebar:
         if api_key_input:
             st.caption("⚡ Connected live to Groq Cloud API.")
         else:
-            st.caption("ℹ️ Enter Groq API key to activate cloud inference.")
+            st.caption("ℹ️ Get a free instant API key at [console.groq.com](https://console.groq.com).")
 
     elif "Gemini" in provider_choice:
-        default_gemini = os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY", "")
+        default_gemini = _fetch_secret("GEMINI_API_KEY") or _fetch_secret("GOOGLE_API_KEY")
         api_key_input = st.text_input(
             "Gemini API Key",
             value=default_gemini,
@@ -624,10 +651,10 @@ with st.sidebar:
         if api_key_input:
             st.caption("🌟 Connected live to Google Gemini API.")
         else:
-            st.caption("ℹ️ Enter Gemini API key to activate cloud inference.")
+            st.caption("ℹ️ Get a free Gemini key at [aistudio.google.com](https://aistudio.google.com).")
 
     elif "OpenAI" in provider_choice:
-        default_openai = os.getenv("OPENAI_API_KEY", "")
+        default_openai = _fetch_secret("OPENAI_API_KEY")
         api_key_input = st.text_input(
             "OpenAI API Key",
             value=default_openai,
@@ -854,12 +881,24 @@ with tab_studio:
             # Configure LLM based on user selection
             configured_llm = None
             if "Groq" in provider_choice:
+                if not api_key_input:
+                    st.warning("⚠️ Please provide a free Groq API key in the sidebar (or configure `GROQ_API_KEY` in Streamlit Secrets). Get a free key instantly at [console.groq.com](https://console.groq.com).")
+                    st.stop()
                 configured_llm = code_dev.get_dev_llm(provider="groq", api_key=api_key_input, model=selected_model, temperature=temperature)
             elif "Gemini" in provider_choice:
+                if not api_key_input:
+                    st.warning("⚠️ Please provide a Gemini API key in the sidebar (or configure `GEMINI_API_KEY` in Streamlit Secrets). Get a free key at [aistudio.google.com](https://aistudio.google.com).")
+                    st.stop()
                 configured_llm = code_dev.get_dev_llm(provider="gemini", api_key=api_key_input, model=selected_model, temperature=temperature)
             elif "OpenAI" in provider_choice:
+                if not api_key_input:
+                    st.warning("⚠️ Please provide an OpenAI API key in the sidebar (or configure `OPENAI_API_KEY` in Streamlit Secrets).")
+                    st.stop()
                 configured_llm = code_dev.get_dev_llm(provider="openai", api_key=api_key_input, model=selected_model, temperature=temperature)
             else:
+                if not code_dev.is_server_alive(local_url):
+                    st.error("⚠️ Local llama-server is not reachable at http://127.0.0.1:8088. If running on Streamlit Cloud, please select **Groq Cloud (Free)** or **Gemini** in the sidebar.")
+                    st.stop()
                 configured_llm = code_dev.get_dev_llm(provider="local", model="X-Estal-4B", base_url=local_url, temperature=temperature)
 
             code_dev.set_active_llm(configured_llm)
