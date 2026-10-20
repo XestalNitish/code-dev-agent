@@ -4,7 +4,7 @@ backgroundColor = "#f7f0fa"
 secondaryBackgroundColor = "#ede4f8"
 textColor = "#1e1b4b"
 font = "sans serif"
-
+ 
 [server]
 headless = true
 enableCORS = false
