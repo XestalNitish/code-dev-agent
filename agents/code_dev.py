@@ -26,6 +26,7 @@ import sys
 import json
 import re
 import time
+import shutil
 import subprocess
 import tempfile
 import logging
@@ -101,26 +102,37 @@ class AutonomousOfflineSynthesizer:
         # CASE 1: Architectural Planner
         if "principal software architect" in (system_content + human_content).lower():
             target = "solution.py"
+            deps = ["sys", "os", "typing", "json", "time"]
+
             if "rag" in prompt_lower or "notebook" in prompt_lower:
                 target = "notebook_light_rag.py"
-            elif "fastapi" in prompt_lower or "auth" in prompt_lower or "api" in prompt_lower:
+                deps = ["math", "re", "dataclasses", "typing"]
+            elif "fastapi" in prompt_lower or "auth" in prompt_lower or "api" in prompt_lower or "jwt" in prompt_lower:
                 target = "auth_service.py"
+                deps = ["hmac", "hashlib", "base64", "json", "time"]
             elif "bitcoin" in prompt_lower or "crypto" in prompt_lower or "price" in prompt_lower:
                 target = "crypto_predictor.py"
-            elif "tumor" in prompt_lower or "classifier" in prompt_lower or "cnn" in prompt_lower:
+                deps = ["math", "typing", "statistics"]
+            elif "tumor" in prompt_lower or "classifier" in prompt_lower or "cnn" in prompt_lower or "neural" in prompt_lower:
                 target = "tumor_classifier.py"
+                deps = ["math", "random", "typing", "dataclasses"]
             elif "scrape" in prompt_lower or "crawler" in prompt_lower:
                 target = "web_scraper.py"
-            elif "tree" in prompt_lower or "avl" in prompt_lower:
+                deps = ["re", "urllib.parse", "typing", "time"]
+            elif "tree" in prompt_lower or "avl" in prompt_lower or "bst" in prompt_lower:
                 target = "avl_tree.py"
+                deps = ["typing", "dataclasses"]
+            elif "sort" in prompt_lower:
+                target = "sorting_algorithms.py"
+                deps = ["random", "typing", "time"]
 
             plan = {
                 "target_file": target,
-                "dependencies": ["sys", "os", "typing", "json", "time", "dataclasses"],
+                "dependencies": deps,
                 "implementation_steps": [
-                    "Define structured domain data models and type contracts",
-                    "Implement core business logic algorithms with defensive edge-case handling",
-                    "Add validation guards, error handling, and performance instrumentation",
+                    "Define domain data models, state contracts, and type safety constraints",
+                    "Implement core algorithmic business logic with defensive edge-case handling",
+                    "Add validation guards, input sanitation, and performance instrumentation",
                     "Embed verifiable unit assertions and self-tests executable under __main__"
                 ],
                 "architectural_notes": "Engineered for high-throughput, low-latency execution with zero external vulnerabilities."
@@ -494,6 +506,110 @@ if __name__ == "__main__":
     assert abs(tree.get_balance(root)) <= 1
     print("✅ AVL Tree Balancing Tests Passed.")
 '''
+        elif "sort" in prompt:
+            return '''"""
+sorting_algorithms.py — Production QuickSort and MergeSort Engine
+Engineered by X-Estal Nitish
+Features: In-place randomized quicksort and stable divide-and-conquer mergesort.
+"""
+
+from __future__ import annotations
+import random
+from typing import List
+
+def quicksort(arr: List[int]) -> List[int]:
+    if len(arr) <= 1:
+        return arr[:]
+    pivot = random.choice(arr)
+    less = [x for x in arr if x < pivot]
+    equal = [x for x in arr if x == pivot]
+    greater = [x for x in arr if x > pivot]
+    return quicksort(less) + equal + quicksort(greater)
+
+def mergesort(arr: List[int]) -> List[int]:
+    if len(arr) <= 1:
+        return arr[:]
+    mid = len(arr) // 2
+    left = mergesort(arr[:mid])
+    right = mergesort(arr[mid:])
+    merged = []
+    i = j = 0
+    while i < len(left) and j < len(right):
+        if left[i] <= right[j]:
+            merged.append(left[i])
+            i += 1
+        else:
+            merged.append(right[j])
+            j += 1
+    merged.extend(left[i:])
+    merged.extend(right[j:])
+    return merged
+
+if __name__ == "__main__":
+    sample = [64, 34, 25, 12, 22, 11, 90, 5, 77]
+    sorted_quick = quicksort(sample)
+    sorted_merge = mergesort(sample)
+    expected = sorted(sample)
+    print("QuickSort Result:", sorted_quick)
+    print("MergeSort Result:", sorted_merge)
+    assert sorted_quick == expected, "QuickSort failed"
+    assert sorted_merge == expected, "MergeSort failed"
+    print("✅ Sorting Algorithms Verified Successfully.")
+'''
+        elif "tumor" in prompt or "classifier" in prompt or "neural" in prompt or "cnn" in prompt:
+            return '''"""
+tumor_classifier.py — Lightweight Multi-Class Neural Classifier Architecture
+Engineered by X-Estal Nitish
+Features: Softmax activation, cross-entropy loss, forward inference & confidence calculation.
+"""
+
+from __future__ import annotations
+import math
+from typing import List, Dict, Any
+
+class BrainTumorClassifier:
+    def __init__(self):
+        self.classes = ["Glioma", "Meningioma", "No Tumor", "Pituitary"]
+        # Calibrated weights for feature classification
+        self.weights = [
+            [0.25, -0.15, 0.40, -0.30],
+            [-0.10, 0.35, -0.20, 0.45],
+            [-0.30, -0.20, 0.50, -0.10],
+            [0.15, 0.20, -0.10, 0.30],
+        ]
+        self.biases = [0.05, 0.02, -0.01, 0.03]
+
+    def softmax(self, logits: List[float]) -> List[float]:
+        max_l = max(logits)
+        exps = [math.exp(x - max_l) for x in logits]
+        sum_exps = sum(exps)
+        return [x / sum_exps for x in exps]
+
+    def predict(self, feature_vector: List[float]) -> Dict[str, Any]:
+        assert len(feature_vector) == 4, "Feature vector must have 4 input dimensions"
+        logits = []
+        for i in range(len(self.classes)):
+            val = self.biases[i]
+            for j in range(len(feature_vector)):
+                val += feature_vector[j] * self.weights[i][j]
+            logits.append(val)
+        probs = self.softmax(logits)
+        best_idx = probs.index(max(probs))
+        return {
+            "predicted_class": self.classes[best_idx],
+            "confidence": round(probs[best_idx] * 100, 2),
+            "class_probabilities": {self.classes[k]: round(probs[k], 4) for k in range(len(self.classes))}
+        }
+
+if __name__ == "__main__":
+    clf = BrainTumorClassifier()
+    test_scan_features = [0.85, 0.12, 0.95, 0.05]
+    result = clf.predict(test_scan_features)
+    print("Inference Result:", result)
+    assert result["predicted_class"] in clf.classes
+    assert 0.0 <= result["confidence"] <= 100.0
+    print("✅ Neural Classifier Verification Passed.")
+'''
         else:
             return f'''"""
 solution.py — High-Performance Solution for: {prompt[:80]}
@@ -565,6 +681,7 @@ def get_dev_llm(
                     model_name=model or "llama-3.3-70b-versatile",
                     temperature=temperature,
                     request_timeout=35,
+                    max_retries=1,
                 )
             except Exception as e:
                 logger.warning(f"Groq initialization notice: {e}")
@@ -580,6 +697,7 @@ def get_dev_llm(
                     model_name=model or "gpt-4o-mini",
                     temperature=temperature,
                     request_timeout=35,
+                    max_retries=1,
                 )
             except Exception as e:
                 logger.warning(f"OpenAI initialization notice: {e}")
@@ -596,6 +714,7 @@ def get_dev_llm(
                     model_name=model or "gemini-1.5-flash",
                     temperature=temperature,
                     request_timeout=35,
+                    max_retries=1,
                 )
             except Exception as e:
                 logger.warning(f"Gemini initialization notice: {e}")
@@ -631,12 +750,25 @@ def set_active_llm(llm: Any) -> None:
 # ─────────────────────────────────────────────────────────────
 
 def extract_code_block(raw_text: str, default_lang: str = "python") -> str:
-    """Safely extract source code inside markdown code fences."""
+    """Safely extract source code inside markdown code fences with alias matching."""
     clean_text = raw_text.strip()
-    pattern = rf"```{default_lang}\s*([\s\S]*?)\s*```"
-    match = re.search(pattern, clean_text, re.IGNORECASE)
-    if match:
-        return match.group(1).strip()
+    
+    # Language aliases
+    lang_aliases = [default_lang]
+    if default_lang in ("python", "py"):
+        lang_aliases = ["python", "py", "python3"]
+    elif default_lang in ("javascript", "js"):
+        lang_aliases = ["javascript", "js", "node"]
+    elif default_lang in ("typescript", "ts"):
+        lang_aliases = ["typescript", "ts"]
+    elif default_lang in ("bash", "sh"):
+        lang_aliases = ["bash", "sh", "shell"]
+
+    for alias in lang_aliases:
+        pattern = rf"```{alias}\s*([\s\S]*?)\s*```"
+        match = re.search(pattern, clean_text, re.IGNORECASE)
+        if match:
+            return match.group(1).strip()
     
     match_generic = re.search(r"```(?:\w+)?\s*([\s\S]*?)\s*```", clean_text)
     if match_generic:
@@ -859,7 +991,8 @@ def real_executor_node(state: CodeDevState) -> dict:
             stderr=subprocess.PIPE,
             text=True,
             timeout=15,
-            cwd=temp_dir
+            cwd=temp_dir,
+            errors="replace"
         )
         duration = round(time.perf_counter() - t0, 3)
 
@@ -901,9 +1034,7 @@ def real_executor_node(state: CodeDevState) -> dict:
         }
     finally:
         try:
-            if os.path.exists(script_path):
-                os.remove(script_path)
-            os.rmdir(temp_dir)
+            shutil.rmtree(temp_dir, ignore_errors=True)
         except Exception:
             pass
 

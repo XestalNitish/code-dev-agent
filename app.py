@@ -14,6 +14,7 @@ import os
 import sys
 import json
 import time
+import shutil
 import subprocess
 import tempfile
 from pathlib import Path
@@ -65,14 +66,14 @@ CLAYMORPHISM_CSS = """
         --clay-amber-gradient: linear-gradient(135deg, #f59e0b, #d97706);
         --text-main: #1e1b4b;
         --text-muted: #5b5478;
-        --clay-shadow-out: 9px 9px 18px rgba(175, 160, 205, 0.4), -9px -9px 18px rgba(255, 255, 255, 0.9);
-        --clay-shadow-sm: 5px 5px 10px rgba(175, 160, 205, 0.35), -5px -5px 10px rgba(255, 255, 255, 0.85);
-        --clay-shadow-lg: 14px 14px 28px rgba(175, 160, 205, 0.45), -14px -14px 28px rgba(255, 255, 255, 0.95);
-        --clay-inset: inset 3px 3px 6px rgba(175, 160, 205, 0.35), inset -3px -3px 6px rgba(255, 255, 255, 0.8);
-        --clay-dark-inset: inset 4px 4px 10px rgba(0, 0, 0, 0.5), inset -3px -3px 8px rgba(255, 255, 255, 0.05);
+        --clay-shadow-out: 10px 10px 20px rgba(175, 160, 205, 0.4), -10px -10px 20px rgba(255, 255, 255, 0.95);
+        --clay-shadow-sm: 5px 5px 12px rgba(175, 160, 205, 0.35), -5px -5px 12px rgba(255, 255, 255, 0.9);
+        --clay-shadow-lg: 16px 16px 32px rgba(175, 160, 205, 0.45), -16px -16px 32px rgba(255, 255, 255, 1);
+        --clay-inset: inset 3px 3px 7px rgba(175, 160, 205, 0.35), inset -3px -3px 7px rgba(255, 255, 255, 0.85);
+        --clay-dark-inset: inset 4px 4px 10px rgba(0, 0, 0, 0.55), inset -3px -3px 8px rgba(255, 255, 255, 0.05);
     }
 
-    /* Streamlit App Container */
+    /* Streamlit Global */
     .stApp {
         background: linear-gradient(135deg, #f7f0fa 0%, #edf2fc 35%, #fbf3f5 70%, #f4edf9 100%);
         background-attachment: fixed;
@@ -111,20 +112,12 @@ CLAYMORPHISM_CSS = """
         padding: 16px 20px;
         margin-bottom: 14px;
         box-shadow: var(--clay-shadow-sm);
-        border: 1px solid rgba(255, 255, 255, 0.6);
+        border: 1px solid rgba(255, 255, 255, 0.65);
         transition: all 0.25s ease;
     }
     .clay-card-sm:hover {
         transform: translateY(-2px);
         box-shadow: var(--clay-shadow-out);
-    }
-
-    .clay-inset-box {
-        background: rgba(240, 230, 250, 0.45);
-        border-radius: 18px;
-        padding: 16px;
-        box-shadow: var(--clay-inset);
-        border: 1px solid rgba(255, 255, 255, 0.4);
     }
 
     /* ═════════════════════════════════════════════════════════
@@ -133,10 +126,10 @@ CLAYMORPHISM_CSS = """
     .clay-header-banner {
         background: linear-gradient(135deg, #ffffff 0%, #f4edf9 100%);
         border-radius: 30px;
-        padding: 28px 36px;
+        padding: 26px 36px;
         margin-bottom: 24px;
         box-shadow: var(--clay-shadow-out);
-        border: 2px solid rgba(255, 255, 255, 0.8);
+        border: 2px solid rgba(255, 255, 255, 0.85);
         display: flex;
         justify-content: space-between;
         align-items: center;
@@ -181,7 +174,7 @@ CLAYMORPHISM_CSS = """
     .header-sub-tag {
         font-size: 0.95rem;
         color: var(--text-muted);
-        font-weight: 500;
+        font-weight: 600;
         margin-top: 4px;
     }
 
@@ -301,7 +294,7 @@ CLAYMORPHISM_CSS = """
     .pipeline-card.active {
         background: linear-gradient(135deg, #ffffff, #ede9fe);
         border: 2px solid #7c3aed;
-        box-shadow: 0 0 15px rgba(124, 58, 237, 0.35);
+        box-shadow: 0 0 16px rgba(124, 58, 237, 0.4);
         transform: scale(1.03);
     }
     .pipeline-card.completed {
@@ -318,22 +311,22 @@ CLAYMORPHISM_CSS = """
         color: var(--text-main);
     }
     .pipeline-status {
-        font-size: 0.72rem;
-        font-weight: 600;
-        margin-top: 4px;
-        padding: 2px 8px;
+        font-size: 0.74rem;
+        font-weight: 700;
+        margin-top: 5px;
+        padding: 3px 9px;
         border-radius: 12px;
         display: inline-block;
     }
-    .status-pending { background: rgba(148, 163, 184, 0.2); color: #64748b; }
-    .status-running { background: rgba(99, 102, 241, 0.2); color: #4338ca; }
+    .status-pending { background: rgba(148, 163, 184, 0.2); color: #475569; }
+    .status-running { background: rgba(99, 102, 241, 0.2); color: #3730a3; }
     .status-done { background: rgba(16, 185, 129, 0.2); color: #047857; }
 
     /* ═════════════════════════════════════════════════════════
        DARK CLAY TERMINAL (SANDBOX EXECUTION LOGS)
        ═════════════════════════════════════════════════════════ */
     .clay-terminal {
-        background: #0f141c;
+        background: #0d1117;
         border-radius: 20px;
         padding: 18px 22px;
         color: #e2e8f0;
@@ -341,7 +334,7 @@ CLAYMORPHISM_CSS = """
         font-size: 0.88rem;
         line-height: 1.6;
         box-shadow: var(--clay-dark-inset);
-        border: 1px solid rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.1);
         overflow-x: auto;
         white-space: pre-wrap;
         margin-top: 12px;
@@ -482,13 +475,13 @@ PRESET_TASKS = {
         "Implement a fully functional self-balancing AVL Tree in Python with node rotations (LL, RR, LR, RL), "
         "insert, delete, in-order traversal, and self-verifying test assertions."
     ),
-    "Resilient Web Scraper & Parser": (
-        "Implement a robust web content extractor with regex and HTML parsing, exponential backoff retries, "
-        "rate limiting, error handling, and unit test assertions."
+    "QuickSort & MergeSort Engine": (
+        "Write an optimized sorting suite with in-place randomized quicksort and stable mergesort, "
+        "benchmarking comparisons, and self-testing unit assertions."
     ),
-    "Neural Network from Scratch": (
-        "Write a complete multi-layer perceptron neural network from scratch in Python with forward pass, "
-        "backpropagation, sigmoid activation, mean squared error loss, and runnable training assertions."
+    "Brain Tumor MRI Classifier Model": (
+        "Write a lightweight multi-class neural network classifier in Python with softmax activation, "
+        "calibrated feature weights for Glioma/Meningioma/No Tumor/Pituitary, and confidence predictions."
     ),
 }
 
@@ -506,13 +499,13 @@ with st.sidebar:
             AI Developer • Multi-Agent Architect
         </div>
         <div style="display: flex; justify-content: center; gap: 8px; flex-wrap: wrap;">
-            <a href="{SOCIAL_LINKS['github']['url']}" target="_blank" class="pill-btn pill-github" style="padding: 6px 14px; font-size: 0.78rem;">
+            <a href="{SOCIAL_LINKS['github']['url']}" target="_blank" rel="noopener noreferrer" class="pill-btn pill-github" style="padding: 6px 14px; font-size: 0.78rem;">
                 {SOCIAL_LINKS['github']['icon']} GitHub
             </a>
-            <a href="{SOCIAL_LINKS['linkedin']['url']}" target="_blank" class="pill-btn pill-linkedin" style="padding: 6px 14px; font-size: 0.78rem;">
+            <a href="{SOCIAL_LINKS['linkedin']['url']}" target="_blank" rel="noopener noreferrer" class="pill-btn pill-linkedin" style="padding: 6px 14px; font-size: 0.78rem;">
                 {SOCIAL_LINKS['linkedin']['icon']} LinkedIn
             </a>
-            <a href="{SOCIAL_LINKS['instagram']['url']}" target="_blank" class="pill-btn pill-instagram" style="padding: 6px 14px; font-size: 0.78rem;">
+            <a href="{SOCIAL_LINKS['instagram']['url']}" target="_blank" rel="noopener noreferrer" class="pill-btn pill-instagram" style="padding: 6px 14px; font-size: 0.78rem;">
                 {SOCIAL_LINKS['instagram']['icon']} Insta
             </a>
         </div>
@@ -601,7 +594,7 @@ with st.sidebar:
     st.markdown("### 🚀 Live Apps by X-Estal Nitish")
     for proj in PORTFOLIO_PROJECTS:
         st.markdown(f"""
-        <a href="{proj['url']}" target="_blank" class="project-clay-item">
+        <a href="{proj['url']}" target="_blank" rel="noopener noreferrer" class="project-clay-item">
             <div class="project-item-title">
                 <span>{proj['icon']} {proj['name']}</span>
                 <span style="font-size: 0.72rem; background: rgba(99,102,241,0.15); color: #4f46e5; padding: 2px 8px; border-radius: 10px;">{proj['tag']}</span>
@@ -643,7 +636,7 @@ st.markdown(f"""
 tab_studio, tab_sandbox, tab_tools, tab_architecture = st.tabs([
     "💻 Code Dev Studio",
     "🧪 Interactive Sandbox",
-    "🛠️ 150-Tool Catalog",
+    "🛠️ 45+ Production Tools",
     "🏗️ Multi-Agent Architecture",
 ])
 
@@ -660,24 +653,24 @@ with tab_studio:
     </div>
     """, unsafe_allow_html=True)
 
-    # Preset inspiration buttons
+    # State initialization for preset prompt
+    if "user_task_input" not in st.session_state:
+        st.session_state["user_task_input"] = PRESET_TASKS["FastAPI Auth Microservice"]
+
+    # Preset inspiration buttons in clean responsive columns
     st.markdown("**💡 Quick Preset Inspirations:**")
     preset_cols = st.columns(len(PRESET_TASKS))
-    selected_preset_prompt = None
-
     for idx, (p_name, p_prompt) in enumerate(PRESET_TASKS.items()):
         with preset_cols[idx]:
             if st.button(p_name, key=f"btn_preset_{idx}", use_container_width=True):
-                st.session_state["active_task_prompt"] = p_prompt
-
-    if "active_task_prompt" not in st.session_state:
-        st.session_state["active_task_prompt"] = PRESET_TASKS["FastAPI Auth Microservice"]
+                st.session_state["user_task_input"] = p_prompt
+                st.rerun()
 
     # Input controls
     with st.container():
         user_task = st.text_area(
             "Task Specification",
-            value=st.session_state.get("active_task_prompt", ""),
+            key="user_task_input",
             height=130,
             placeholder="Describe the software module, endpoint, algorithm, or service you want the Code Dev Agent to build...",
             help="Be specific about requirements, input/output formats, and architectural expectations."
@@ -696,7 +689,11 @@ with tab_studio:
         with col_mode:
             exec_mode = st.selectbox(
                 "Pipeline Execution Mode",
-                options=["Full Autonomous Pipeline (Plan -> Code -> Audit -> Run -> Debug -> Deliver)", "Fast Code Generation Only", "Security Audit & Review Only"],
+                options=[
+                    "Full Autonomous Pipeline (Plan -> Code -> Audit -> Run -> Debug -> Deliver)",
+                    "Fast Code Generation Only",
+                    "Security Audit & Review Only"
+                ],
                 index=0
             )
 
@@ -777,6 +774,7 @@ with tab_studio:
             def step_cb(node_name: str, state_update: Dict[str, Any]):
                 idx = node_to_idx.get(node_name, 0)
                 render_pipeline_ui(idx)
+                time.sleep(0.15)  # Smooth visual transition
 
             with st.spinner("🤖 Autonomous Code Dev Agent executing workflow..."):
                 t_start = time.perf_counter()
@@ -799,6 +797,7 @@ with tab_studio:
     if "latest_agent_result" in st.session_state:
         res = st.session_state["latest_agent_result"]
         dur = st.session_state.get("latest_agent_duration", 0)
+        display_file = os.path.basename(res.get("file_path", "solution.py"))
 
         st.markdown(f"""
         <div class="clay-card-sm" style="display: flex; justify-content: space-between; align-items: center;">
@@ -806,7 +805,7 @@ with tab_studio:
                 ✅ Code Development Task Completed
             </div>
             <div style="font-size: 0.85rem; color: #6366f1; font-weight: 700;">
-                ⏱️ Elapsed: {dur}s | 🎯 Target: <code>{res.get('file_path')}</code>
+                ⏱️ Elapsed: {dur}s | 🎯 Target: <code>{display_file}</code>
             </div>
         </div>
         """, unsafe_allow_html=True)
@@ -814,28 +813,40 @@ with tab_studio:
         res_col_left, res_col_right = st.columns([1.3, 1])
 
         with res_col_left:
-            st.markdown("#### 📝 Verified Source Code")
+            st.markdown(f"#### 📝 Verified Source Code (`{display_file}`)")
             code_text = res.get("code", "")
             st.code(code_text, language=target_language, line_numbers=True)
 
-            # Download & Copy action buttons
+            # Action buttons
             btn_col1, btn_col2 = st.columns([1, 1])
             with btn_col1:
                 st.download_button(
-                    label=f"💾 Download {res.get('file_path')}",
+                    label=f"💾 Download {display_file}",
                     data=code_text,
-                    file_name=res.get("file_path", "solution.py"),
+                    file_name=display_file,
                     mime="text/plain",
                     use_container_width=True
                 )
             with btn_col2:
-                if st.button("📋 Copy Code Snippet", use_container_width=True):
-                    st.toast("✅ Source code copied to clipboard!")
+                if st.button("🔄 Re-Run in Sandbox", use_container_width=True):
+                    with st.spinner("Executing in sandbox..."):
+                        temp_d = tempfile.mkdtemp(prefix="res_sandbox_")
+                        script_p = os.path.join(temp_d, display_file)
+                        try:
+                            with open(script_p, "w", encoding="utf-8") as f:
+                                f.write(code_text)
+                            t0 = time.perf_counter()
+                            proc = subprocess.run([sys.executable, script_p], capture_output=True, text=True, timeout=15, cwd=temp_d)
+                            d_ms = round((time.perf_counter() - t0) * 1000, 2)
+                            st.session_state["latest_agent_result"]["execution_output"] = proc.stdout or proc.stderr or f"Exit Code: {proc.returncode}"
+                            st.toast(f"✅ Sandbox re-run complete ({d_ms}ms, Exit: {proc.returncode})")
+                            st.rerun()
+                        finally:
+                            shutil.rmtree(temp_d, ignore_errors=True)
 
         with res_col_right:
             st.markdown("#### ⚡ Sandboxed Execution & Verification")
             stdout_logs = res.get("execution_output", "No stdout logs generated.")
-            test_res = res.get("test_result", "Completed")
 
             st.markdown(f"""
             <div class="clay-terminal">
@@ -845,7 +856,7 @@ with tab_studio:
                         <span class="terminal-dot dot-yellow"></span>
                         <span class="terminal-dot dot-green"></span>
                     </div>
-                    <span>Sandbox Terminal — {res.get('file_path')}</span>
+                    <span>Sandbox Terminal — {display_file}</span>
                 </div>
                 <div>{stdout_logs}</div>
             </div>
@@ -884,35 +895,59 @@ with tab_sandbox:
     </div>
     """, unsafe_allow_html=True)
 
-    default_sandbox_code = '''"""
-Sandbox Validation Test
-Engineered by X-Estal Nitish
-"""
-import sys
-import time
+    # Sandbox presets
+    SAMPLE_SCRIPTS = {
+        "Fibonacci & Performance Timer": (
+            'import time\n\n'
+            'def fib(n: int) -> int:\n'
+            '    a, b = 0, 1\n'
+            '    for _ in range(n):\n'
+            '        a, b = b, a + b\n'
+            '    return a\n\n'
+            't0 = time.perf_counter()\n'
+            'result = fib(100)\n'
+            'elapsed = time.perf_counter() - t0\n'
+            'print(f"Fibonacci(100) = {result}")\n'
+            'print(f"Calculated in {elapsed*1000:.4f} ms")\n'
+            'assert result > 0\n'
+            'print("✅ Assertion passed!")'
+        ),
+        "Data Analytics & Statistics": (
+            'import statistics\n'
+            'data = [12, 15, 18, 22, 29, 35, 41, 52, 63, 75, 88, 99]\n'
+            'print("Dataset Count:", len(data))\n'
+            'print("Mean:", statistics.mean(data))\n'
+            'print("Median:", statistics.median(data))\n'
+            'print("Std Dev:", round(statistics.stdev(data), 3))\n'
+            'print("Variance:", round(statistics.variance(data), 3))\n'
+            'assert statistics.mean(data) > 0\n'
+            'print("✅ Statistical verification passed!")'
+        ),
+        "Regex Email & Token Extractor": (
+            'import re\n'
+            'text = "Contact us at support@xestal.ai, sales@xestal.dev, or security@xestal.org for details."\n'
+            'emails = re.findall(r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}", text)\n'
+            'print("Discovered Emails:", emails)\n'
+            'assert len(emails) == 3\n'
+            'print("✅ Extraction assertions passed!")'
+        )
+    }
 
-def compute_fibonacci(n: int) -> int:
-    if n <= 1:
-        return n
-    a, b = 0, 1
-    for _ in range(2, n + 1):
-        a, b = b, a + b
-    return b
+    st.markdown("**⚡ Load Quick Sandbox Samples:**")
+    sb_cols = st.columns(3)
+    for idx, (s_name, s_code) in enumerate(SAMPLE_SCRIPTS.items()):
+        with sb_cols[idx]:
+            if st.button(s_name, key=f"sb_btn_{idx}", use_container_width=True):
+                st.session_state["custom_sandbox_code"] = s_code
+                st.rerun()
 
-if __name__ == "__main__":
-    t0 = time.perf_counter()
-    res = compute_fibonacci(50)
-    elapsed = time.perf_counter() - t0
-    print(f"Fibonacci(50) = {res}")
-    print(f"Calculation completed in {elapsed * 1000:.4f} ms")
-    assert res == 12586269025, "Validation failed!"
-    print("✅ All unit assertions verified successfully.")
-'''
+    if "custom_sandbox_code" not in st.session_state:
+        st.session_state["custom_sandbox_code"] = SAMPLE_SCRIPTS["Fibonacci & Performance Timer"]
 
     sandbox_input = st.text_area(
         "Python Code to Execute",
-        value=default_sandbox_code,
-        height=280,
+        key="custom_sandbox_code",
+        height=260,
         help="Paste any python code to run in the isolated sandbox."
     )
 
@@ -935,7 +970,8 @@ if __name__ == "__main__":
                     stderr=subprocess.PIPE,
                     text=True,
                     timeout=15,
-                    cwd=temp_dir
+                    cwd=temp_dir,
+                    errors="replace"
                 )
                 dur = round(time.perf_counter() - t0, 3)
 
@@ -970,23 +1006,18 @@ if __name__ == "__main__":
             except Exception as e:
                 st.error(f"Sandbox runtime error: {e}")
             finally:
-                try:
-                    if os.path.exists(temp_file):
-                        os.remove(temp_file)
-                    os.rmdir(temp_dir)
-                except Exception:
-                    pass
+                shutil.rmtree(temp_dir, ignore_errors=True)
 
 
 # ─────────────────────────────────────────────────────────────
-# TAB 3: 150-TOOL AGENT CATALOG
+# TAB 3: 45+ PRODUCTION TOOLS CATALOG
 # ─────────────────────────────────────────────────────────────
 
 with tab_tools:
     st.markdown("""
     <div class="clay-card">
         <div style="font-weight: 800; font-size: 1.2rem; color: #1e1b4b; margin-bottom: 6px;">
-            🛠️ Agentic AI Tools Suite
+            🛠️ Production Agentic Tools Suite (45+ Active Tools)
         </div>
         <div style="font-size: 0.9rem; color: #5b5478;">
             The X-Estal agent ecosystem includes modular tools spanning code engineering,
@@ -995,7 +1026,7 @@ with tab_tools:
     </div>
     """, unsafe_allow_html=True)
 
-    tool_search = st.text_input("🔍 Search tools by name or description...", placeholder="e.g. python, executor, secret, token, git...")
+    tool_search = st.text_input("🔍 Search tools by name or description...", placeholder="e.g. python, executor, secret, token, git, diff, hash...")
     category_filter = st.selectbox("Filter by Category", options=["All Categories"] + list(TOOLS_BY_CATEGORY.keys()))
 
     all_tool_entries = list_all_tools()
@@ -1007,7 +1038,7 @@ with tab_tools:
         if match_cat and match_query:
             filtered_tools.append(t)
 
-    st.markdown(f"**Showing {len(filtered_tools)} Tools:**")
+    st.markdown(f"**Showing {len(filtered_tools)} of {len(all_tool_entries)} Tools:**")
 
     cols_tools = st.columns(3)
     for idx, tool_info in enumerate(filtered_tools):
@@ -1078,7 +1109,7 @@ with tab_architecture:
                 <div style="font-size: 0.88rem; color: #5b5478; line-height: 1.5; margin-bottom: 16px;">
                     {p['desc']}
                 </div>
-                <a href="{p['url']}" target="_blank" class="pill-btn pill-github" style="background: linear-gradient(135deg, #6366f1, #8b5cf6);">
+                <a href="{p['url']}" target="_blank" rel="noopener noreferrer" class="pill-btn pill-github" style="background: linear-gradient(135deg, #6366f1, #8b5cf6);">
                     🔗 Open Live App
                 </a>
             </div>
@@ -1092,13 +1123,13 @@ with tab_architecture:
 st.markdown(f"""
 <div class="clay-footer">
     <div style="display: flex; justify-content: center; gap: 12px; margin-bottom: 16px; flex-wrap: wrap;">
-        <a href="{SOCIAL_LINKS['github']['url']}" target="_blank" class="pill-btn pill-github">
+        <a href="{SOCIAL_LINKS['github']['url']}" target="_blank" rel="noopener noreferrer" class="pill-btn pill-github">
             {SOCIAL_LINKS['github']['icon']} GitHub @XestalNitish
         </a>
-        <a href="{SOCIAL_LINKS['linkedin']['url']}" target="_blank" class="pill-btn pill-linkedin">
+        <a href="{SOCIAL_LINKS['linkedin']['url']}" target="_blank" rel="noopener noreferrer" class="pill-btn pill-linkedin">
             {SOCIAL_LINKS['linkedin']['icon']} LinkedIn Nitish Kumar
         </a>
-        <a href="{SOCIAL_LINKS['instagram']['url']}" target="_blank" class="pill-btn pill-instagram">
+        <a href="{SOCIAL_LINKS['instagram']['url']}" target="_blank" rel="noopener noreferrer" class="pill-btn pill-instagram">
             {SOCIAL_LINKS['instagram']['icon']} Instagram @x_estal_nitish
         </a>
     </div>
