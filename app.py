@@ -557,26 +557,38 @@ with st.sidebar:
     st.markdown(dev_card_html, unsafe_allow_html=True)
 
     # AI Engine Provider Settings
-    st.markdown("### 🧠 AI Engine Settings")
+    st.markdown("### 🧠 Live AI Engine Settings")
 
     provider_choice = st.selectbox(
-        "Inference Engine",
+        "Live Inference Engine",
         options=[
-            "Autonomous Built-in Engine (Zero-Key Demo)",
-            "Groq (Fast Cloud - Free Key)",
+            "Local Spark-X2.5-4B (llama-server Live)",
+            "Groq Cloud (Fast Llama-3.3 / Qwen-2.5 Coder)",
             "Google Gemini (API Key)",
             "OpenAI (GPT-4o / GPT-4o-mini)",
-            "Local Spark-X2.5-4B (llama-server)",
         ],
         index=0,
-        help="Select the LLM backend for planning, writing, and debugging source code."
+        help="Select the live LLM engine for planning, writing, and debugging source code."
     )
 
     api_key_input = ""
     selected_model = ""
     local_url = "http://127.0.0.1:8088/v1"
 
-    if "Groq" in provider_choice:
+    if "Local" in provider_choice:
+        local_url = st.text_input("Local Server Base URL", value="http://127.0.0.1:8088/v1")
+        selected_model = "X-Estal-4B"
+        if code_dev.is_server_alive():
+            st.success("🟢 Local Spark-X2.5 server is ONLINE & running live (Port 8088).")
+        else:
+            st.warning("⚠️ Local llama-server is currently offline.")
+            if st.button("🚀 Start Local LLM Server", use_container_width=True):
+                with st.spinner("Starting local Spark-X2.5 llama-server..."):
+                    import local_llm_service
+                    local_llm_service.start_local_server(wait_timeout=10)
+                    st.rerun()
+
+    elif "Groq" in provider_choice:
         default_groq = os.getenv("GROQ_API_KEY", "")
         api_key_input = st.text_input(
             "Groq API Key",
@@ -590,10 +602,10 @@ with st.sidebar:
             options=["llama-3.3-70b-versatile", "qwen-2.5-coder-32b", "llama-3.1-8b-instant"],
             index=0
         )
-        if not api_key_input:
-            st.caption("ℹ️ No key entered; auto-fallback to Resilient Offline Synthesizer active.")
+        if api_key_input:
+            st.caption("⚡ Connected live to Groq Cloud API.")
         else:
-            st.caption("⚡ Connected to Groq Cloud API.")
+            st.caption("ℹ️ Enter Groq API key to activate cloud inference.")
 
     elif "Gemini" in provider_choice:
         default_gemini = os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY", "")
@@ -609,10 +621,10 @@ with st.sidebar:
             options=["gemini-1.5-flash", "gemini-2.0-flash", "gemini-1.5-pro"],
             index=0
         )
-        if not api_key_input:
-            st.caption("ℹ️ No key entered; auto-fallback to Resilient Offline Synthesizer active.")
+        if api_key_input:
+            st.caption("🌟 Connected live to Google Gemini API.")
         else:
-            st.caption("🌟 Connected to Google Gemini API.")
+            st.caption("ℹ️ Enter Gemini API key to activate cloud inference.")
 
     elif "OpenAI" in provider_choice:
         default_openai = os.getenv("OPENAI_API_KEY", "")
@@ -628,20 +640,10 @@ with st.sidebar:
             options=["gpt-4o-mini", "gpt-4o"],
             index=0
         )
-        if not api_key_input:
-            st.caption("ℹ️ No key entered; auto-fallback to Resilient Offline Synthesizer active.")
+        if api_key_input:
+            st.caption("🤖 Connected live to OpenAI API.")
         else:
-            st.caption("🤖 Connected to OpenAI API.")
-
-    elif "Local" in provider_choice:
-        local_url = st.text_input("Local Server Base URL", value="http://127.0.0.1:8088/v1")
-        selected_model = "X-Estal-4B"
-        if code_dev.is_server_alive(local_url):
-            st.success("🟢 Local Spark-X2.5 server is ONLINE.")
-        else:
-            st.warning("⚠️ Local llama-server (Port 8088) is OFFLINE. The agent will automatically use the Resilient Synthesizer so requests never hang.")
-    else:
-        st.success("🟢 Autonomous resilient engine active. Runs 100% offline with zero API key requirement!")
+            st.caption("ℹ️ Enter OpenAI API key to activate cloud inference.")
 
     st.markdown("---")
 
@@ -857,10 +859,8 @@ with tab_studio:
                 configured_llm = code_dev.get_dev_llm(provider="gemini", api_key=api_key_input, model=selected_model, temperature=temperature)
             elif "OpenAI" in provider_choice:
                 configured_llm = code_dev.get_dev_llm(provider="openai", api_key=api_key_input, model=selected_model, temperature=temperature)
-            elif "Local" in provider_choice:
-                configured_llm = code_dev.get_dev_llm(provider="local", model="X-Estal-4B", base_url=local_url, temperature=temperature)
             else:
-                configured_llm = code_dev.AutonomousOfflineSynthesizer(temperature=temperature)
+                configured_llm = code_dev.get_dev_llm(provider="local", model="X-Estal-4B", base_url=local_url, temperature=temperature)
 
             code_dev.set_active_llm(configured_llm)
 
